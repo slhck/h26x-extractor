@@ -45,25 +45,25 @@ You can pass the `-v` flag to enable verbose output, e.g. the following. You wil
 - The overall length including start code
 - The type (also translated in plaintext)
 - Its content in raw bytes, encoded as hex
+- Its RBSP content
 - A table with its content decoded, if supported
 
 Example:
 
-    NALU bytepos:   [0, 27]
+    NALU bytepos:   [0, 28]
     NALU offset:    0 Bytes
-    NALU length:    28 Bytes (including start code)
+    NALU length:    29 Bytes (including start code)
     NALU type:      7 (Sequence parameter set)
-    NALU bytes:     0x0000000167640015acd94141fb0e10000003001000000780f162d960
+    NALU bytes:     0x0000000167f4000d919b28283f6022000003000200000300641e28532c
+    NALU RBSP:      0xf4000d919b28283f602200000002000000641e28532c
 
-    SPS (payload size: 23 Bytes)
+    SPS (payload size: 22.0 Bytes)
     +--------------------------------------+---------+
     | field                                | value   |
     +======================================+=========+
-    | bit_depth_chroma_minus8              | 0       |
+    | constraint_set0_flag                 | 0       |
     +--------------------------------------+---------+
-    | bit_depth_luma_minus8                | 0       |
-    +--------------------------------------+---------+
-    | chroma_format_idc                    | 1       |
+    | constraint_set1_flag                 | 0       |
     +--------------------------------------+---------+
     ....
 
@@ -86,7 +86,7 @@ Valid callbacks are:
 - `aud`
 - `nalu`
 
-Raw data for all callbacks never includes the start code, but all the NAL headers, except for the "nalu" callback.
+Raw data for all callbacks includes the RBSP.
 
 You can also call the `nalutypes` classes to decode the individual fields, e.g. `nalutypes.SPS`.
 

@@ -1,5 +1,5 @@
 """
-h26x-extractor 0.1
+h26x-extractor 0.2
 
 Usage:
   h26x-extractor [options] <input-file>...
@@ -18,10 +18,11 @@ from . import __version__
 from . import h26x_parser
 
 def main():
-  args = docopt(__doc__, version=str(__version__), options_first=False)
-  for f in args['<input-file>']:
-    ex = h26x_parser.H26xParser(f, verbose=args['--verbose'])
-    ex.parse()
+    args = docopt(__doc__, version=str(__version__), options_first=False)
+    for f in args['<input-file>']:
+        ex = h26x_parser.H26xParser(f, verbose=args['--verbose'])
+        ex.parse()
+
 
 if __name__ == '__main__':
-  main()
+    main()
