@@ -11,8 +11,8 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-# Get the history from the HISTORY file
-with open(path.join(here, 'HISTORY.md'), encoding='utf-8') as f:
+# Get the history from the CHANGELOG file
+with open(path.join(here, 'CHANGELOG.md'), encoding='utf-8') as f:
     history = f.read()
 
 try:
@@ -51,6 +51,8 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
     entry_points={
         'console_scripts': [
