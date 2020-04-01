@@ -154,7 +154,7 @@ class H26xParser:
         nal_unit_payload = nalu_bytes[nalu_bytes.pos:]
 
         rbsp_payload = BitStream()
-        for i in range(int(len(nal_unit_payload)/8) - 1):
+        for i in range(int(len(nal_unit_payload)/8)):
             if len(nal_unit_payload) - nal_unit_payload.pos >= 24 and \
                nal_unit_payload.peek('bits:24') == '0x000003':
                 rbsp_payload.append(nal_unit_payload.read('bits:8'))
