@@ -53,26 +53,29 @@ class H26xParser:
         "nalu"
     ]
 
-    def __init__(self, f, verbose=False):
+    def __init__(self, f, verbose=False, use_bitstream=None):
         """
         Create a new extractor for a .264/h264 file in Annex B format.
 
         f: input file
+        use_bitstream: blob to use as bitstream (for testing)
         verbose: whether to print out NAL structure and fields
         """
-
-        fn, ext = os.path.splitext(os.path.basename(f))
-        valid_input_ext = ['.264', '.h264']
-        # TODO: extend for H.265
-        # valid_input_ext = ['.264', 'h264', '.265', '.h265']
-        if not ext in valid_input_ext:
-            raise RuntimeError("Valid input types: " + str(valid_input_ext))
-
-        bitstream_file = f
-
-        self.file = bitstream_file
+        if use_bitstream:
+            # testing the parser in a bitstream
+            self.file = None
+            self.stream = BitStream(use_bitstream)
+        else:
+            fn, ext = os.path.splitext(os.path.basename(f))
+            valid_input_ext = ['.264', '.h264']
+            # TODO: extend for H.265
+            # valid_input_ext = ['.264', 'h264', '.265', '.h265']
+            if not ext in valid_input_ext:
+                raise RuntimeError("Valid input types: " + str(valid_input_ext))
+            bitstream_file = f
+            self.file = bitstream_file
+            self.stream = BitStream(filename=bitstream_file)
         self.verbose = verbose
-        self.stream = BitStream(filename=bitstream_file)
         self.callbacks = {}
 
     def set_callback(self, name, fun):
@@ -151,7 +154,7 @@ class H26xParser:
         nal_unit_payload = nalu_bytes[nalu_bytes.pos:]
 
         rbsp_payload = BitStream()
-        for i in range(int(len(nal_unit_payload)/8) - 1):
+        for i in range(int(len(nal_unit_payload)/8)):
             if len(nal_unit_payload) - nal_unit_payload.pos >= 24 and \
                nal_unit_payload.peek('bits:24') == '0x000003':
                 rbsp_payload.append(nal_unit_payload.read('bits:8'))
