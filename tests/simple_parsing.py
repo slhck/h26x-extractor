@@ -3,6 +3,10 @@
 """Simple unittest usage."""
 
 import unittest
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from h26x_extractor import h26x_parser
 
