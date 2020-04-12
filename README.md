@@ -1,6 +1,6 @@
 # h26x-extractor
 
-Author: Werner Robitza
+Author: Werner Robitza, with contributions from @chemag
 
 Extracts NAL units from H.264 bitstreams and decodes their type and content, if supported.
 
@@ -8,11 +8,7 @@ Extracts NAL units from H.264 bitstreams and decodes their type and content, if 
 
 # Installation
 
-Python 2.7:
-
-    pip install h26x-extractor
-
-Python 3.x:
+Via pip:
 
     pip3 install h26x-extractor
 
@@ -94,7 +90,7 @@ You can also call the `nalutypes` classes to decode the individual fields, e.g. 
 
 The MIT License (MIT)
 
-Copyright (c) 2017 Werner Robitza
+Copyright (c) 2017-2020 Werner Robitza
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the
