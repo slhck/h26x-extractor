@@ -1,5 +1,7 @@
 # h26x-extractor
 
+[![PyPI version](https://badge.fury.io/py/h26x-extractor.svg)](https://badge.fury.io/py/h26x-extractor)
+
 Author: Werner Robitza, with contributions from @chemag
 
 Extracts NAL units from H.264 bitstreams and decodes their type and content, if supported.
