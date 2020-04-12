@@ -174,6 +174,8 @@ class H26xParser:
         """
 
         self._get_nalu_positions()
+        nalu_sps = None
+        nalu_pps = None
         for current_nalu_pos, next_nalu_pos in zip(self.nal_unit_positions, islice(self.nal_unit_positions, 1, None)):
             current_nalu_bytepos = int(current_nalu_pos / 8)
             next_nalu_bytepos = int(next_nalu_pos / 8)
@@ -209,8 +211,8 @@ class H26xParser:
                 aud = nalutypes.AUD(rbsp_payload, self.verbose)
                 self.__call('aud', rbsp_payload)
             elif nal_unit_type == nalutypes.NAL_UNIT_TYPE_CODED_SLICE_NON_IDR:
-                nalu_slice = nalutypes.CodedSliceNonIDR(rbsp_payload, self.verbose)
+                nalu_slice = nalutypes.CodedSliceNonIDR(rbsp_payload, nalu_sps, nalu_pps, self.verbose)
                 self.__call('slice', rbsp_payload)
             elif nal_unit_type == nalutypes.NAL_UNIT_TYPE_CODED_SLICE_IDR:
-                nalu_slice = nalutypes.CodedSliceIDR(rbsp_payload, self.verbose)
+                nalu_slice = nalutypes.CodedSliceIDR(rbsp_payload, nalu_sps, nalu_pps, self.verbose)
                 self.__call('slice', rbsp_payload)

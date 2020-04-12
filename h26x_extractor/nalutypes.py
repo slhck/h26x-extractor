@@ -96,17 +96,26 @@ class NALU(object):
     The type must be inferred from the NALU header, before initializing the NALU by its subclass.
     """
 
-    def __init__(self, rbsp_bytes, verbose):
+    def __init__(self, rbsp_bytes, verbose, order=None):
         self.s = rbsp_bytes
         self.verbose = verbose
+        self.order = order
 
     def print_verbose(self):
         if self.verbose:
             print(self.__class__.__name__ + " (payload size: " + str(len(self.s) / 8) + " Bytes)")
             to_print = []
+            if self.order is not None:
+                for key in self.order:
+                    if key in vars(self):
+                        value = vars(self)[key]
+                        to_print.append([key, value])
             for key, value in sorted(vars(self).items()):
-                if (key != "verbose" and key != "s"):
-                    to_print.append([key, value])
+                if key == "verbose" or key == "s" or key == "order":
+                    continue
+                if self.order and key in self.order:
+                    continue
+                to_print.append([key, value])
             print(tabulate(to_print, headers=["field", "value"], tablefmt="grid"))
 
 class AUD(NALU):
@@ -126,13 +135,36 @@ class CodedSliceIDR(NALU):
     Coded slice of an IDR picture.
     """
 
-    def __init__(self, rbsp_bytes, verbose):
-        super(CodedSliceIDR, self).__init__(rbsp_bytes, verbose)
-
+    def __init__(self, rbsp_bytes, nalu_sps, nalu_pps, verbose):
+        order = [
+            'first_mb_in_slice',
+            'slice_type',
+            'slice_type_clear',
+            'pic_parameter_set_id',
+            'colour_plane_id',
+            'frame_num',
+            'field_pic_flag',
+            'bottom_field_flag',
+            'idr_pic_id',
+        ]
+        super(CodedSliceIDR, self).__init__(rbsp_bytes, verbose, order)
+        # parse slice_header
         self.first_mb_in_slice = self.s.read('ue')
         self.slice_type = self.s.read('ue')
         self.slice_type_clear = _get_slice_type(self.slice_type)
         self.pic_parameter_set_id = self.s.read('ue')
+        if ('separate_colour_plane_flag' in dir(nalu_sps) and
+            nalu_sps.separate_colour_plane_flag == 1):
+            self.colour_plane_id = self.s.read('uint:2')
+        self.frame_num = self.s.read('uint:%i' % (nalu_sps.log2_max_frame_num_minus4 + 4))
+        if not nalu_sps.frame_mbs_only_flag:
+            self.field_pic_flag = self.s.read('uint:1')
+            if self.field_pic_flag:
+                self.bottom_field_flag = self.s.read('uint:1')
+        IdrPicFlag = 1
+        if IdrPicFlag:
+            self.idr_pic_id = self.s.read('ue')
+
 
         self.print_verbose()
 
@@ -141,9 +173,10 @@ class CodedSliceNonIDR(NALU):
     Coded slice of a non-IDR picture.
     """
 
-    def __init__(self, rbsp_bytes, verbose):
+    def __init__(self, rbsp_bytes, nalu_sps, nalu_pps, verbose):
         super(CodedSliceNonIDR, self).__init__(rbsp_bytes, verbose)
 
+        # parse slice_header
         self.first_mb_in_slice = self.s.read('ue')
         self.slice_type = self.s.read('ue')
         self.slice_type_clear = _get_slice_type(self.slice_type)
@@ -157,7 +190,46 @@ class SPS(NALU):
     """
 
     def __init__(self, rbsp_bytes, verbose):
-        super(SPS, self).__init__(rbsp_bytes, verbose)
+        order = [
+            'profile_idc',
+            'constraint_set0_flag',
+            'constraint_set1_flag',
+            'constraint_set2_flag',
+            'constraint_set3_flag',
+            'constraint_set4_flag',
+            'constraint_set5_flag',
+            'reserved_zero_2bits',
+            'level_idc',
+            'seq_parameter_set_id',
+            'chroma_format_idc',
+            'separate_colour_plane_flag',
+            'bit_depth_luma_minus8',
+            'bit_depth_chroma_minus8',
+            'qpprime_y_zero_transform_bypass_flag',
+            'seq_scaling_matrix_present_flag',
+            'log2_max_frame_num_minus4',
+            'pic_order_cnt_type',
+            'log2_max_pic_order_cnt_lsb_minus4',
+            'delta_pic_order_always_zero_flag',
+            'offset_for_non_ref_pic',
+            'offset_for_top_to_bottom_filed',
+            'num_ref_frames_in_pic_order_cnt_cycle',
+            'offset_for_ref_frame',
+            'num_ref_frames',
+            'gaps_in_frame_num_value_allowed_flag',
+            'pic_width_in_mbs_minus_1',
+            'pic_height_in_map_units_minus_1',
+            'frame_mbs_only_flag',
+            'mb_adapative_frame_field_flag',
+            'direct_8x8_inference_flag',
+            'frame_cropping_flag',
+            'frame_crop_left_offst',
+            'frame_crop_right_offset',
+            'frame_crop_top_offset',
+            'frame_crop_bottom_offset',
+            'vui_parameters_present_flag',
+        ]
+        super(SPS, self).__init__(rbsp_bytes, verbose, order)
 
         # initializers
         self.offset_for_ref_frame = []
@@ -174,10 +246,10 @@ class SPS(NALU):
         self.level_idc = self.s.read('uint:8')
         self.seq_parameter_set_id = self.s.read('ue')
 
-        if ((self.profile_idc == 100) or (self.profile_idc == 110) or (self.profile_idc == 122) or (self.profile_idc == 144)):
+        if self.profile_idc in [100, 110, 122, 244, 44, 83, 86, 118, 128, 138, 139, 134, 135]:
             self.chroma_format_idc = self.s.read('ue')
             if self.chroma_format_idc == 3:
-                self.residual_colour_transform_flag = self.s.read('uint:1')
+                self.separate_colour_plane_flag = self.s.read('uint:1')
 
             self.bit_depth_luma_minus8 = self.s.read('ue')
             self.bit_depth_chroma_minus8 = self.s.read('ue')
@@ -225,7 +297,32 @@ class SPS(NALU):
 
 class PPS(NALU):
     def __init__(self, rbsp_bytes, verbose):
-        super(PPS, self).__init__(rbsp_bytes, verbose)
+        order = [
+            'pic_parameter_set_id',
+            'seq_parameter_set_id',
+            'entropy_coding_mode_flag',
+            'pic_order_present_flag',
+            'num_slice_groups_minus1',
+            'slice_group_map_type',
+            'run_length_minus1',
+            'top_left',
+            'bottom_right',
+            'slice_group_change_direction_flag',
+            'slice_group_change_rate_minus1',
+            'pic_size_in_map_units_minus1',
+            'slice_group_id',
+            'num_ref_idx_l0_active_minus1',
+            'num_ref_idx_l1_active_minus1',
+            'weighted_pred_flag',
+            'weighted_bipred_idc',
+            'pic_init_qp_minus26',
+            'pic_init_qs_minus26',
+            'chroma_qp_index_offset',
+            'deblocking_filter_control_present_flag',
+            'constrained_intra_pred_flag',
+            'redundant_pic_cnt_present_flag',
+        ]
+        super(PPS, self).__init__(rbsp_bytes, verbose, order)
 
         self.pic_parameter_set_id = self.s.read('ue')
         self.seq_parameter_set_id = self.s.read('ue')
@@ -246,7 +343,7 @@ class PPS(NALU):
                     self.bottom_right.append(self.s.read('ue'))
             elif self.slice_group_map_type in [3, 4, 5]:
                 self.slice_group_change_direction_flag = self.s.read('uint:1')
-                self.slice_gropu_change_rate_minus1 = self.s.read('ue')
+                self.slice_group_change_rate_minus1 = self.s.read('ue')
             elif self.slice_group_map_type == 6:
                 self.pic_size_in_map_units_minus1 = self.s.read('ue')
                 self.slice_group_id = []
