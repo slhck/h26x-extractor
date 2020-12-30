@@ -17,12 +17,13 @@ from . import __version__
 
 from . import h26x_parser
 
+
 def main():
     args = docopt(__doc__, version=str(__version__), options_first=False)
-    for f in args['<input-file>']:
-        ex = h26x_parser.H26xParser(f, verbose=args['--verbose'])
+    for f in args["<input-file>"]:
+        ex = h26x_parser.H26xParser(f, verbose=args["--verbose"])
         ex.parse()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
