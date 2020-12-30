@@ -1,6 +1,25 @@
 # Changelog
 
 
+## v0.5 (2020-12-30)
+
+* Bump version to 0.5.
+
+* Apply formatting.
+
+* Rm python 2.x support, README fixes.
+
+* Fix frame_crop_left_offset typo (#5)
+
+* Formatting.
+
+* Import local package for tests.
+
+* Add pypi badge.
+
+* Add missing gitchangelog template.
+
+
 ## v0.4 (2020-04-12)
 
 * Bump version to 0.4.
