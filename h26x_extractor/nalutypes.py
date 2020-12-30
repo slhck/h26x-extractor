@@ -223,7 +223,7 @@ class SPS(NALU):
             'mb_adapative_frame_field_flag',
             'direct_8x8_inference_flag',
             'frame_cropping_flag',
-            'frame_crop_left_offst',
+            'frame_crop_left_offset',
             'frame_crop_right_offset',
             'frame_crop_top_offset',
             'frame_crop_bottom_offset',
@@ -283,7 +283,7 @@ class SPS(NALU):
         self.direct_8x8_inference_flag = self.s.read('uint:1')
         self.frame_cropping_flag = self.s.read('uint:1')
         if self.frame_cropping_flag:
-            self.frame_crop_left_offst = self.s.read('ue')
+            self.frame_crop_left_offset = self.s.read('ue')
             self.frame_crop_right_offset = self.s.read('ue')
             self.frame_crop_top_offset = self.s.read('ue')
             self.frame_crop_bottom_offset = self.s.read('ue')
