@@ -10,6 +10,8 @@ Extracts NAL units from H.264 bitstreams and decodes their type and content, if 
 
 # Installation
 
+Requirements: Python 3.5 or higher
+
 Via pip:
 
     pip3 install h26x-extractor
@@ -38,7 +40,7 @@ Currently planned:
 
 You can pass the `-v` flag to enable verbose output, e.g. the following. You will get, for each NAL unit:
 
-- The bye position range
+- The byte position range
 - The offset from the start of the stream
 - The overall length including start code
 - The type (also translated in plaintext)
@@ -69,14 +71,16 @@ Example:
 
 You can also use this library in your code, e.g.:
 
-    from h26x_extractor.h26x_parser import H26xParser
+```python
+from h26x_extractor.h26x_parser import H26xParser
 
-    H26xParser.set_callback("nalu", do_something)
-    H26xParser.parse()
-    def do_something(bytes):
-      # do something with the NALU bytes
+H26xParser.set_callback("nalu", do_something)
+H26xParser.parse()
+def do_something(bytes):
+    # do something with the NALU bytes
+```
 
-Valid callbacks are:
+The callback is called for each type of info found. Valid callbacks are:
 
 - `sps`
 - `pps`
@@ -84,9 +88,20 @@ Valid callbacks are:
 - `aud`
 - `nalu`
 
-Raw data for all callbacks includes the RBSP.
+The raw data for all callbacks includes the RBSP.
 
-You can also call the `nalutypes` classes to decode the individual fields, e.g. `nalutypes.SPS`.
+You can also call the `nalutypes` classes to decode the individual fields, e.g. `nalutypes.SPS`:
+
+```python
+from h26x_extractor.h26x_parser import H26xParser
+from h26x_extractor.nalutypes import SPS
+
+H26xParser.set_callback("sps", parse_sps)
+H26xParser.parse()
+def parse_sps(bytes):
+    sps = SPS(bytes)
+    sps.print_verbose()
+```
 
 # License
 

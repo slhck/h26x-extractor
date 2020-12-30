@@ -27,15 +27,6 @@ from bitstring import BitStream
 from itertools import islice
 import sys
 import os
-
-try:
-    from future_builtins import zip
-except ImportError:  # not 2.6+ or is 3.x
-    try:
-        from itertools import izip as zip  # < 2.5 or 3.x
-    except ImportError:
-        pass
-
 from . import nalutypes
 
 class H26xParser:
@@ -70,7 +61,7 @@ class H26xParser:
             valid_input_ext = ['.264', '.h264']
             # TODO: extend for H.265
             # valid_input_ext = ['.264', 'h264', '.265', '.h265']
-            if not ext in valid_input_ext:
+            if ext not in valid_input_ext:
                 raise RuntimeError("Valid input types: " + str(valid_input_ext))
             bitstream_file = f
             self.file = bitstream_file
