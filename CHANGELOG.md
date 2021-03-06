@@ -1,6 +1,17 @@
 # Changelog
 
 
+## v0.6 (2021-03-06)
+
+* Bump version to 0.6.
+
+* Switch version to string.
+
+* Format setup.py and switch to markdown.
+
+* Update badge URL.
+
+
 ## v0.5 (2020-12-30)
 
 * Bump version to 0.5.
