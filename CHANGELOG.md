@@ -1,6 +1,15 @@
 # Changelog
 
 
+## v0.7.0 (2021-03-10)
+
+* Bump version to 0.7.0.
+
+* Add python_requires to setup.py.
+
+* Remove release script.
+
+
 ## v0.6 (2021-03-06)
 
 * Bump version to 0.6.
