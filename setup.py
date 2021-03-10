@@ -49,5 +49,6 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
     ],
+    python_requires=">=3.6",
     entry_points={"console_scripts": ["h26x-extractor = h26x_extractor.__main__:main"]},
 )
