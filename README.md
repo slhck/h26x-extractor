@@ -6,9 +6,8 @@ Author: Werner Robitza, with contributions from @chemag
 
 Extracts NAL units from H.264 bitstreams and decodes their type and content, if supported.
 
-**Note:** This is not a replacement for a proper tool like [h264bitstream](https://github.com/aizvorski/h264bitstream). `h26x-extractor` is not fast and not robust, but rather a playground for parsing bitstreams. Use with caution!
-
-# Installation
+⚠️ `h26x-extractor` is neither fast nor robust to bitstream errors. It's rather a playground for parsing bitstreams. Use with caution!
+## Installation
 
 Requirements: Python 3.5 or higher
 
@@ -16,7 +15,7 @@ Via pip:
 
     pip3 install h26x-extractor
 
-# Status
+## Status
 
 Currently supported:
 
@@ -34,7 +33,7 @@ Currently planned:
 - Parsing of VUI
 - Parsing of H.265 bitstreams
 
-# Usage
+## Usage
 
     h26x-extractor [options] <input-file>...
 
@@ -67,17 +66,19 @@ Example:
     +--------------------------------------+---------+
     ....
 
-# Programmatic usage
+## Programmatic usage
 
 You can also use this library in your code, e.g.:
 
 ```python
 from h26x_extractor.h26x_parser import H26xParser
 
+def do_something(bytes):
+    pass
+    # do something with the NALU bytes
+
 H26xParser.set_callback("nalu", do_something)
 H26xParser.parse()
-def do_something(bytes):
-    # do something with the NALU bytes
 ```
 
 The callback is called for each type of info found. Valid callbacks are:
@@ -96,11 +97,22 @@ You can also call the `nalutypes` classes to decode the individual fields, e.g. 
 from h26x_extractor.h26x_parser import H26xParser
 from h26x_extractor.nalutypes import SPS
 
-H26xParser.set_callback("sps", parse_sps)
-H26xParser.parse()
 def parse_sps(bytes):
     sps = SPS(bytes)
     sps.print_verbose()
+
+H26xParser.set_callback("sps", parse_sps)
+H26xParser.parse()
+```
+
+## Alternatives
+
+[h264bitstream](https://github.com/aizvorski/h264bitstream) is a proper H.264 parser.
+
+FFmpeg can also parse bitstream data:
+
+```
+ffmpeg -i video.h264 -c copy -bsf:v trace_headers -f null - 2> output.txt
 ```
 
 # License
