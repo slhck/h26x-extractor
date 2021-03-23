@@ -1,6 +1,6 @@
 # h26x-extractor
 
-[![PyPI version](https://img.shields.io/pypi/v/h26x-extractor.svg)](https://img.shields.io/pypi/v/h26x-extractor)
+[![PyPI version](https://img.shields.io/pypi/v/h26x-extractor.svg)](https://pypi.org/project/h26x-extractor)
 
 Author: Werner Robitza, with contributions from @chemag
 
