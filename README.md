@@ -2,7 +2,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/h26x-extractor.svg)](https://pypi.org/project/h26x-extractor)
 
-Author: Werner Robitza, with contributions from @chemag
+Author: Werner Robitza, with contributions from @chemag, Paulo Sherring.
 
 Extracts NAL units from H.264 bitstreams and decodes their type and content, if supported.
 
