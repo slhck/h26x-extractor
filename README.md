@@ -35,7 +35,13 @@ Currently planned:
 
 ## Usage
 
+If you installed the program via pip, you can run it directly:
+
     h26x-extractor [options] <input-file>...
+
+Otherwise you can clone this repo and run it via:
+
+    python3 -m h264_extractor [options] <input-file>...
 
 You can pass the `-v` flag to enable verbose output, e.g. the following. You will get, for each NAL unit:
 
