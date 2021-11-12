@@ -17,6 +17,7 @@ from . import h26x_parser
 
 args = docopt(__doc__, version=str(__version__), options_first=False)
 
+
 def main():
     for f in args["<input-file>"]:
         ex = h26x_parser.H26xParser(f, verbose=args["--verbose"])
@@ -28,5 +29,4 @@ if __name__ == "__main__":
     main()
     stop = time.time()
     if args["--verbose"]:
-      print(main.__name__ + " took " + str(stop - start) + " seconds")
-
+        print(main.__name__ + " took " + str(stop - start) + " seconds")

@@ -29,13 +29,14 @@ import sys
 import os
 from . import nalutypes
 
+
 class H26xParser:
     """
     H.264 extractor for Annex B streams.
     """
 
     VALID_CALLBACKS = ["sps", "pps", "slice", "aud", "nalu"]
-    startCodePrefixShort =  b'\x00\x00\x01'
+    startCodePrefixShort = b"\x00\x00\x01"
 
     def __init__(self, f, verbose=False, use_bitstream=None):
         """
@@ -63,7 +64,7 @@ class H26xParser:
         self.nalu_pos = self._get_nalu_pos()
         self.verbose = verbose
         self.callbacks = {}
-                     
+
     def getRSBP(self, start, end):
         """
         Get the Rbsp from the NAL unit.
@@ -73,9 +74,9 @@ class H26xParser:
         i = 0
         i_max = len(rbsp_enc)
         while i < i_max:
-            if (i + 2 < i_max) and (rbsp_enc[i:i+3] == b'\x00\x00\x03'):
+            if (i + 2 < i_max) and (rbsp_enc[i : i + 3] == b"\x00\x00\x03"):
                 rbsp_dec.append(rbsp_enc[i])
-                rbsp_dec.append(rbsp_enc[i+1])
+                rbsp_dec.append(rbsp_enc[i + 1])
                 i += 2
             else:
                 rbsp_dec.append(rbsp_enc[i])
@@ -130,14 +131,14 @@ class H26xParser:
         size = self.byte_stream.__len__()
         nals = []
         retnals = []
-        
+
         pos = 0
         while pos < size:
             is4bytes = False
             retpos = self.byte_stream.find(self.startCodePrefixShort, pos)
             if retpos == -1:
                 break
-            if self.byte_stream[retpos-1] == 0:
+            if self.byte_stream[retpos - 1] == 0:
                 retpos -= 1
                 is4bytes = True
             if is4bytes:
@@ -145,18 +146,18 @@ class H26xParser:
             else:
                 pos = retpos + 3
             val = hex(self.byte_stream[pos])
-            val = "{0:#0{1}x}".format(self.byte_stream[pos],4)
-            bitField = BitStream (val)
+            val = "{0:#0{1}x}".format(self.byte_stream[pos], 4)
+            bitField = BitStream(val)
             fb = bitField.read(1).uint
             nri = bitField.read(2).uint
             type = bitField.read(5).uint
             nals.append((pos, is4bytes, fb, nri, type))
-        for i in range(0, len(nals)-1):
+        for i in range(0, len(nals) - 1):
             start = nals[i][0]
-            if (nals[i+1][1]):
-                end = nals[i+1][0] -5
+            if nals[i + 1][1]:
+                end = nals[i + 1][0] - 5
             else:
-                end = nals[i+1][0] -4
+                end = nals[i + 1][0] - 4
             retnals.append((start, end, nals[i][1], nals[i][2], nals[i][3], nals[i][4]))
         start = nals[-1][0]
         end = self.byte_stream.__len__() - 1
@@ -172,32 +173,26 @@ class H26xParser:
         self._get_nalu_pos()
 
         for idx, (start, end, is4bytes, fb, nri, type) in enumerate(self.nalu_pos):
-            #print("NAL#%d: %d, %d, %d, %d, %d" % (idx, start, end, fb, nri, type))
-            if (is4bytes):
+            # print("NAL#%d: %d, %d, %d, %d, %d" % (idx, start, end, fb, nri, type))
+            if is4bytes:
                 _start = start - 4
             else:
                 _start = start - 3
-            
+
             if self.verbose:
                 print("")
                 print(
                     "========================================================================================================"
                 )
                 print("")
-                print(
-                    "NALU bytepos:\t["
-                    + str(_start)
-                    + ", "
-                    + str(end)
-                    + "]"
-                )
+                print("NALU bytepos:\t[" + str(_start) + ", " + str(end) + "]")
                 print("NALU offset:\t" + str(_start) + " Bytes")
                 print(
                     "NALU length:\t"
-                    + str(end - _start +1 )
+                    + str(end - _start + 1)
                     + " Bytes (including start code)"
                 )
-            rbsp_payload = self.getRSBP(start+1, end+1)
+            rbsp_payload = self.getRSBP(start + 1, end + 1)
 
             if self.verbose:
                 print(
@@ -210,14 +205,14 @@ class H26xParser:
                 # print("NALU bytes:\t" + '0x' +(self.byte_stream[_start:end+1].hex()))
                 # print("NALU RBSP:\t" + '0x' + bytearray(rbsp_payload).hex())
                 # print("")
-                substr = (self.byte_stream[_start:end+1].hex())
+                substr = self.byte_stream[_start : end + 1].hex()
                 if len(substr) > 250:
                     substr = substr[:250] + "..."
-                print("NALU bytes:\t" + '0x' + substr)
+                print("NALU bytes:\t" + "0x" + substr)
                 substr = bytearray(rbsp_payload).hex()
                 if len(substr) > 250:
                     substr = substr[:250] + "..."
-                print("NALU RBSP:\t" + '0x' + substr)
+                print("NALU RBSP:\t" + "0x" + substr)
                 print("")
 
             rbsp_payload_bs = BitStream(bytearray(rbsp_payload))

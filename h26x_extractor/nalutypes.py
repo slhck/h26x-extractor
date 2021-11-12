@@ -47,7 +47,9 @@ NAL_UNIT_TYPE_END_OF_STREAM = 11  # End of stream
 NAL_UNIT_TYPE_FILLER = 12  # Filler data
 NAL_UNIT_TYPE_SPS_EXT = 13  # Sequence parameter set extension
 # 14..18                                          # Reserved
-NAL_UNIT_TYPE_CODED_SLICE_AUX = 19  # Coded slice of an auxiliary coded picture without partitioning
+NAL_UNIT_TYPE_CODED_SLICE_AUX = (
+    19  # Coded slice of an auxiliary coded picture without partitioning
+)
 # 20..23                                          # Reserved
 # 24..31                                          # Unspecified
 
@@ -391,4 +393,3 @@ class PPS(NALU):
         self.redundant_pic_cnt_present_flag = self.s.read("uint:1")
 
         self.print_verbose()
-
