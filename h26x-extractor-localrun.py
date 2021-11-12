@@ -22,9 +22,10 @@ After installation, you can run the program with:
 
 """
 import sys, time
+sys.path.append('h26x_extractor/')
 from docopt import docopt
-from . import __version__
-from . import h26x_parser
+from h26x_extractor import __version__
+from h26x_extractor import h26x_parser
 
 def timeit(method):
     def timed(*args, **kw):
@@ -52,4 +53,3 @@ if __name__ == "__main__":
       print('Verbose is true')
     else:
       print('Verbose is false')
-
