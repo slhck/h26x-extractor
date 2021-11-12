@@ -1,9 +1,5 @@
 # Changelog
 
-## v0.7.1 (2021-11-12)
-
-* Changes to H26xParser, to make it more performatic. First extraction occurs using bytearrays instead of Bitstream. Performed benchmark resulted roughly in a reduction from 250s to 2.5s.
-
 ## v0.7.0 (2021-03-10)
 
 * Bump version to 0.7.0.

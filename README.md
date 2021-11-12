@@ -1,9 +1,5 @@
 # h26x-extractor
 
-## Why the fork?
-
-When I've started working on this, I disregarded whether the original author would or would not accept pull requests. So, this was why.
-
 [![PyPI version](https://img.shields.io/pypi/v/h26x-extractor.svg)](https://pypi.org/project/h26x-extractor)
 
 Author: Werner Robitza, with contributions from @chemag, Paulo Sherring.
