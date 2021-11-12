@@ -26,16 +26,6 @@ from docopt import docopt
 from . import __version__
 from . import h26x_parser
 
-def timeit(method):
-    def timed(*args, **kw):
-        ts = time.time()
-        result = method(*args, **kw)
-        te = time.time()
-        print('%r  %2.2f ms' % \
-                (method.__name__, (te - ts) * 1000))
-        return result
-    return timed
-
 args = docopt(__doc__, version=str(__version__), options_first=False)
 
 def main():
@@ -44,12 +34,9 @@ def main():
         ex.parse()
 
 if __name__ == "__main__":
-    if args["--verbose"] == True:
-      timeit(main)()
-    else:
-      main()
-    if args["--verbose"] == True:
-      print('Verbose is true')
-    else:
-      print('Verbose is false')
+    start = time.time()
+    main()
+    stop = time.time()
+    if args["--verbose"]:
+      print (main.__name__ + " took " + str(stop - start) + " seconds")
 
