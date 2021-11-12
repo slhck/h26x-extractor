@@ -1,6 +1,27 @@
 # Changelog
 
 
+## v0.8.0 (2021-11-12)
+
+* Bump version to 0.8.0.
+
+* Remove unneeded imports.
+
+* Rename test dir.
+
+* Apply formatting with black.
+
+* Parse as bytearray instead of BitStream.
+
+* Update copyright year.
+
+* Add requirements.txt.
+
+* Update badge link.
+
+* Update README.
+
+
 ## v0.7.0 (2021-03-10)
 
 * Bump version to 0.7.0.
