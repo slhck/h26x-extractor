@@ -24,8 +24,6 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.>
 
 from bitstring import BitStream
-from itertools import islice
-import sys
 import os
 from . import nalutypes
 
