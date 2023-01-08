@@ -1,6 +1,15 @@
 # Changelog
 
 
+## v0.8.1 (2023-01-08)
+
+* Bump version to 0.8.1.
+
+* Organize imports.
+
+* Update module structure, readme.
+
+
 ## v0.8.0 (2021-11-12)
 
 * Bump version to 0.8.0.
