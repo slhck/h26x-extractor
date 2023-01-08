@@ -6,10 +6,19 @@ Author: Werner Robitza, with contributions from @chemag, Paulo Sherring.
 
 Extracts NAL units from H.264 bitstreams and decodes their type and content, if supported.
 
-⚠️ `h26x-extractor` is neither fast nor robust to bitstream errors. It's rather a playground for parsing bitstreams. Use with caution!
+⚠️ `h26x-extractor` is neither fast nor robust to bitstream errors. It's rather a playground for parsing bitstreams. Use with caution! This program is no longer maintained, PRs are welcome.
+
+Contents:
+
+- [Installation](#installation)
+- [Status](#status)
+- [Usage](#usage)
+- [Programmatic usage](#programmatic-usage)
+- [Alternatives](#alternatives)
+
 ## Installation
 
-Requirements: Python 3.5 or higher
+Requirements: Python 3.8 or higher
 
 Via pip:
 
@@ -125,7 +134,7 @@ ffmpeg -i video.h264 -c copy -bsf:v trace_headers -f null - 2> output.txt
 
 The MIT License (MIT)
 
-Copyright (c) 2017-2021 Werner Robitza
+Copyright (c) 2017-2023 Werner Robitza
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the

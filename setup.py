@@ -1,24 +1,26 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-from setuptools import setup, find_packages
 
-# To use a consistent encoding
-from codecs import open
 import os
-from os import path
 
-here = path.abspath(path.dirname(__file__))
+from setuptools import setup
+
+here = os.path.abspath(os.path.dirname(__file__))
 
 # Versioning
 with open(os.path.join(here, "h26x_extractor", "__init__.py")) as version_file:
-    version = eval(version_file.read().split("\n")[0].split("=")[1].strip())
+    for line in version_file:
+        if line.startswith("__version__"):
+            version = line.split("=")[1].strip().strip('"')
+            break
+    else:
+        raise RuntimeError("Unable to find version string.")
 
 # Get the long description from the README file
-with open(path.join(here, "README.md"), encoding="utf-8") as f:
+with open(os.path.join(here, "README.md")) as f:
     long_description = f.read()
 
 # Get the history from the CHANGELOG file
-with open(path.join(here, "CHANGELOG.md"), encoding="utf-8") as f:
+with open(os.path.join(here, "CHANGELOG.md")) as f:
     history = f.read()
 
 setup(
@@ -43,12 +45,11 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.8",
     entry_points={"console_scripts": ["h26x-extractor = h26x_extractor.__main__:main"]},
 )
