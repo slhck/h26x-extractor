@@ -245,6 +245,38 @@ class SPS(NALU):
             "frame_crop_top_offset",
             "frame_crop_bottom_offset",
             "vui_parameters_present_flag",
+            "aspect_ratio_info_present_flag",
+            "aspect_ratio_idc",
+            "sar_width",
+            "sar_height",
+            "overscan_info_present_flag",
+            "overscan_appropriate_flag",
+            "video_signal_type_present_flag",
+            "video_format",
+            "video_full_range_flag",
+            "colour_description_present_flag",
+            "colour_primaries",
+            "transfer_characteristics",
+            "matrix_coefficients",
+            "chroma_loc_info_present_flag",
+            "chroma_sample_loc_type_top_field",
+            "chroma_sample_loc_type_bottom_field",
+            "timing_info_present_flag",
+            "num_units_in_tick",
+            "time_scale",
+            "fixed_frame_rate_flag",
+            "nal_hrd_parameters_present_flag",
+            "vcl_hrd_parameters_present_flag",
+            "low_delay_hrd_flag",
+            "pic_struct_present_flag",
+            "bitstream_restriction_flag",
+            "motion_vectors_over_pic_boundaries_flag",
+            "max_bytes_per_pic_denom",
+            "max_bits_per_mb_denom",
+            "log2_max_mv_length_horizontal",
+            "log2_max_mv_length_vertical",
+            "max_num_reorder_frames",
+            "max_dec_frame_buffering",
         ]
         super(SPS, self).__init__(rbsp_bytes, verbose, order)
 
@@ -320,7 +352,57 @@ class SPS(NALU):
             self.frame_crop_bottom_offset = self.s.read("ue")
         self.vui_parameters_present_flag = self.s.read("uint:1")
 
-        # TODO: parse VUI
+        # parse VUI
+        if self.vui_parameters_present_flag:
+            self.aspect_ratio_info_present_flag = self.s.read('uint:1')
+            if self.aspect_ratio_info_present_flag:
+                self.aspect_ratio_idc = self.s.read('uint:8')
+                if self.aspect_ratio_idc == 255:    # Extended_SAR
+                    self.sar_width  = self.s.read('uint:16')
+                    self.sar_height = self.s.read('uint:16')
+            self.overscan_info_present_flag = self.s.read('uint:1')
+            if self.overscan_info_present_flag:
+                self.overscan_appropriate_flag = self.s.read('uint:1')
+            self.video_signal_type_present_flag = self.s.read('uint:1')
+            if self.video_signal_type_present_flag:
+                self.video_format = self.s.read('uint:3')
+                self.video_full_range_flag = self.s.read('uint:1')
+                self.colour_description_present_flag = self.s.read('uint:1')
+                if self.colour_description_present_flag:
+                    self.colour_primaries = self.s.read('uint:8')
+                    self.transfer_characteristics = self.s.read('uint:8')
+                    self.matrix_coefficients = self.s.read('uint:8')
+            self.chroma_loc_info_present_flag = self.s.read('uint:1')
+            if self.chroma_loc_info_present_flag:
+                self.chroma_sample_loc_type_top_field = self.s.read('ue')
+                self.chroma_sample_loc_type_bottom_field = self.s.read('ue')
+            self.timing_info_present_flag = self.s.read('uint:1')
+            if self.timing_info_present_flag:
+                self.num_units_in_tick = self.s.read('uint:32')
+                self.time_scale = self.s.read('uint:32')
+                self.fixed_frame_rate_flag = self.s.read('uint:1')
+
+            self.nal_hrd_parameters_present_flag = self.s.read('uint:1')
+            if self.nal_hrd_parameters_present_flag:
+                raise NotImplementedError("hrd_parameters decoding is not implemented.")
+
+            self.vcl_hrd_parameters_present_flag = self.s.read('uint:1')
+            if self.vcl_hrd_parameters_present_flag:
+                raise NotImplementedError("hrd_parameters decoding is not implemented.")
+
+            if self.nal_hrd_parameters_present_flag or self.vcl_hrd_parameters_present_flag:
+                self.low_delay_hrd_flag = self.s.read('uint:1')
+            self.pic_struct_present_flag = self.s.read('uint:1')
+            self.bitstream_restriction_flag = self.s.read('uint:1')
+            if self.bitstream_restriction_flag:
+                self.motion_vectors_over_pic_boundaries_flag = self.s.read('uint:1')
+                self.max_bytes_per_pic_denom = self.s.read('ue')
+                self.max_bits_per_mb_denom = self.s.read('ue')
+                self.log2_max_mv_length_horizontal = self.s.read('ue')
+                self.log2_max_mv_length_vertical = self.s.read('ue')
+                self.max_num_reorder_frames = self.s.read('ue')
+                self.max_dec_frame_buffering = self.s.read('ue')
+
         # self.rbsp_stop_one_bit         = self.s.read('uint:1')
 
         self.print_verbose()
