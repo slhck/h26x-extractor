@@ -39,7 +39,6 @@ Currently supported:
 Currently planned:
 
 - Parsing of SEI
-- Parsing of VUI
 - Parsing of H.265 bitstreams
 
 ## Usage
