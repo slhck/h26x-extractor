@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-
-"""Simple unittest usage."""
-
 import os
 import sys
 import unittest
