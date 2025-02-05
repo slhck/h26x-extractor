@@ -23,7 +23,7 @@ Requirements: Python 3.9 or higher
 
 Via pip:
 
-    pip3 install h26x-extractor
+    pip3 install h26x_extractor
 
 ## Status
 

@@ -24,7 +24,7 @@ with open(os.path.join(here, "CHANGELOG.md")) as f:
     history = f.read()
 
 setup(
-    name="h26x-extractor",
+    name="h26x_extractor",
     version=version,
     description="Extract NAL units from H.264 bitstreams",
     long_description=long_description + "\n\n" + history,
