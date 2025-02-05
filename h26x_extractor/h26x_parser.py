@@ -38,13 +38,12 @@ class H26xParser:
     VALID_CALLBACKS = ["sps", "pps", "slice", "aud", "nalu"]
     startCodePrefixShort = b"\x00\x00\x01"
 
-    def __init__(self, f, verbose=False, use_bitstream=None):
+    def __init__(self, f, use_bitstream=None, nalu_types=[]):
         """
         Create a new extractor for a .264/h264 file in Annex B format.
 
         f: input file
         use_bitstream: blob to use as bitstream (for testing)
-        verbose: whether to print out NAL structure and fields
         """
         if use_bitstream:
             self.byte_stream = bytearray.fromhex(use_bitstream)
@@ -62,7 +61,6 @@ class H26xParser:
                 self.byte_stream = f.read()
                 self.byte_stream = bytearray(self.byte_stream)
         self.nalu_pos = self._get_nalu_pos()
-        self.verbose = verbose
         self.callbacks = {}
 
     def getRSBP(self, start, end):
@@ -82,6 +80,13 @@ class H26xParser:
                 rbsp_dec.append(rbsp_enc[i])
             i += 1
         return rbsp_dec
+    
+    def set_allcallbacks(self, fun):
+        """
+        Set a callback function for all types of NALUs.
+        """
+        for name in self.VALID_CALLBACKS:
+            self.set_callback(name, fun)
 
     def set_callback(self, name, fun):
         """
@@ -178,60 +183,23 @@ class H26xParser:
                 _start = start - 4
             else:
                 _start = start - 3
-
-            if self.verbose:
-                print("")
-                print(
-                    "========================================================================================================"
-                )
-                print("")
-                print("NALU bytepos:\t[" + str(_start) + ", " + str(end) + "]")
-                print("NALU offset:\t" + str(_start) + " Bytes")
-                print(
-                    "NALU length:\t"
-                    + str(end - _start + 1)
-                    + " Bytes (including start code)"
-                )
+            
             rbsp_payload = self.getRSBP(start + 1, end + 1)
 
-            if self.verbose:
-                print(
-                    "NALU type:\t"
-                    + str(type)
-                    + " ("
-                    + nalutypes.get_description(type)
-                    + ")"
-                )
-                # print("NALU bytes:\t" + '0x' +(self.byte_stream[_start:end+1].hex()))
-                # print("NALU RBSP:\t" + '0x' + bytearray(rbsp_payload).hex())
-                # print("")
-                substr = self.byte_stream[_start : end + 1].hex()
-                if len(substr) > 250:
-                    substr = substr[:250] + "..."
-                print("NALU bytes:\t" + "0x" + substr)
-                substr = bytearray(rbsp_payload).hex()
-                if len(substr) > 250:
-                    substr = substr[:250] + "..."
-                print("NALU RBSP:\t" + "0x" + substr)
-                print("")
-
+            # Parse the current NALU
             rbsp_payload_bs = BitStream(bytearray(rbsp_payload))
             if type == nalutypes.NAL_UNIT_TYPE_SPS:
-                nalu_sps = nalutypes.SPS(rbsp_payload_bs, self.verbose)
-                self.__call("sps", rbsp_payload_bs)
+                nalu_sps = nalutypes.SPS(rbsp_payload_bs)
+                self.__call("sps", nalu_sps, type, _start, end)
             elif type == nalutypes.NAL_UNIT_TYPE_PPS:
-                nalu_pps = nalutypes.PPS(rbsp_payload_bs, self.verbose)
-                self.__call("pps", rbsp_payload_bs)
+                nalu_pps = nalutypes.PPS(rbsp_payload_bs)
+                self.__call("pps", nalu_pps, type, _start, end)
             elif type == nalutypes.NAL_UNIT_TYPE_AUD:
-                aud = nalutypes.AUD(rbsp_payload_bs, self.verbose)
-                self.__call("aud", rbsp_payload_bs)
-            elif type == nalutypes.NAL_UNIT_TYPE_CODED_SLICE_NON_IDR:
-                nalu_slice = nalutypes.CodedSliceNonIDR(
-                    rbsp_payload_bs, nalu_sps, nalu_pps, self.verbose
-                )
-                self.__call("slice", rbsp_payload_bs)
-            elif type == nalutypes.NAL_UNIT_TYPE_CODED_SLICE_IDR:
-                nalu_slice = nalutypes.CodedSliceIDR(
-                    rbsp_payload_bs, nalu_sps, nalu_pps, self.verbose
-                )
-                self.__call("slice", rbsp_payload_bs)
+                aud = nalutypes.AUD(rbsp_payload_bs)
+                self.__call("aud", aud, type, _start, end)
+            elif type in [nalutypes.NAL_UNIT_TYPE_CODED_SLICE_NON_IDR, nalutypes.NAL_UNIT_TYPE_CODED_SLICE_IDR, nalutypes.NAL_UNIT_TYPE_CODED_SLICE_AUX]:
+                nalu_slice = nalutypes.CodedSlice(rbsp_payload_bs, nalu_sps, nalu_pps, type)
+                self.__call("slice", nalu_slice, type, _start, end)
+            else:
+                other = nalutypes.NALU(rbsp_payload_bs)
+                self.__call("nalu", other, type, _start, end)
