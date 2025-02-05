@@ -33,7 +33,7 @@ elif (args["--verbose"]):
     for i in range(32):
         nalu_types.append(i)
 
-def print_nalu(parser, type, start, end, nalu: nalutypes.NALU):
+def print_nalu(parser, nalu: nalutypes.NALU, type, start, end):
     """
     Print the NALU information to the console if the type is in the verbose list.
     """
@@ -79,11 +79,7 @@ def main():
         # This is a good example of how to use the h26x_parser module
         # and how to set up callbacks for every NALU types.
         parser = h26x_parser.H26xParser(f)
-        parser.set_callback("sps", partial(print_nalu, parser))
-        parser.set_callback("pps", partial(print_nalu, parser))
-        parser.set_callback("aud", partial(print_nalu, parser))
-        parser.set_callback("slice", partial(print_nalu, parser))
-        parser.set_callback("nalu", partial(print_nalu, parser)) # all other NALU types
+        parser.set_allcallbacks(partial(print_nalu, parser))
         parser.parse()
 
 if __name__ == "__main__":

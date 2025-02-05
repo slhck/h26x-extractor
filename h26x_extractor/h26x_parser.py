@@ -80,6 +80,13 @@ class H26xParser:
                 rbsp_dec.append(rbsp_enc[i])
             i += 1
         return rbsp_dec
+    
+    def set_allcallbacks(self, fun):
+        """
+        Set a callback function for all types of NALUs.
+        """
+        for name in self.VALID_CALLBACKS:
+            self.set_callback(name, fun)
 
     def set_callback(self, name, fun):
         """
@@ -183,16 +190,16 @@ class H26xParser:
             rbsp_payload_bs = BitStream(bytearray(rbsp_payload))
             if type == nalutypes.NAL_UNIT_TYPE_SPS:
                 nalu_sps = nalutypes.SPS(rbsp_payload_bs)
-                self.__call("sps", type, _start, end, nalu_sps)
+                self.__call("sps", nalu_sps, type, _start, end)
             elif type == nalutypes.NAL_UNIT_TYPE_PPS:
                 nalu_pps = nalutypes.PPS(rbsp_payload_bs)
-                self.__call("pps", type, _start, end, nalu_pps)
+                self.__call("pps", nalu_pps, type, _start, end)
             elif type == nalutypes.NAL_UNIT_TYPE_AUD:
                 aud = nalutypes.AUD(rbsp_payload_bs)
-                self.__call("aud", type, _start, end, aud)
+                self.__call("aud", aud, type, _start, end)
             elif type in [nalutypes.NAL_UNIT_TYPE_CODED_SLICE_NON_IDR, nalutypes.NAL_UNIT_TYPE_CODED_SLICE_IDR, nalutypes.NAL_UNIT_TYPE_CODED_SLICE_AUX]:
                 nalu_slice = nalutypes.CodedSlice(rbsp_payload_bs, nalu_sps, nalu_pps, type)
-                self.__call("slice", type, _start, end, nalu_slice)
+                self.__call("slice", nalu_slice, type, _start, end)
             else:
                 other = nalutypes.NALU(rbsp_payload_bs)
-                self._call("nalu", type, _start, end, other)
+                self.__call("nalu", other, type, _start, end)
