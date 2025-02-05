@@ -13,7 +13,8 @@ Contents:
 - [Installation](#installation)
 - [Status](#status)
 - [Usage](#usage)
-- [Programmatic usage](#programmatic-usage)
+- [Programmatic usage (API)](#programmatic-usage-api)
+- [API](#api)
 - [Alternatives](#alternatives)
 
 ## Installation
@@ -79,9 +80,15 @@ Example:
     +--------------------------------------+---------+
     ....
 
-## Programmatic usage
+## Programmatic usage (API)
 
-You can also use this library in your code, e.g.:
+## API
+
+This program has a simple API that can be used to integrate it into other Python programs.
+
+For more information see the [API documentation](https://htmlpreview.github.io/?https://github.com/slhck/h26x-extractor/blob/master/docs/h26x_extractor.html).
+
+Here is an example:
 
 ```python
 from h26x_extractor.h26x_parser import H26xParser
@@ -103,6 +110,7 @@ The callback is called for each type of info found. Valid callbacks are:
 - `nalu`
 
 The callback returns an instance of the NALU type. You can access the `s` property to get the whole data including the RBSP.
+You can use the `set_allcallbacks` method to set callbacks for all types.
 
 You can also call the `nalutypes` classes to decode the individual fields, e.g. `nalutypes.SPS`:
 
