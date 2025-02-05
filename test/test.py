@@ -12,11 +12,15 @@ from h26x_extractor import h26x_parser
 
 
 class ParsingTest(unittest.TestCase):
+    def print_nalu(nalu, *args):
+        nalu.print_verbose()
+
     def testAUDParser(self):
         """Simple AUD parsing."""
         blob = "000000010910"
         # create parser
-        ex = h26x_parser.H26xParser(None, verbose=True, use_bitstream=blob)
+        ex = h26x_parser.H26xParser(None, use_bitstream=blob)
+        ex.set_allcallbacks(ParsingTest.print_nalu)
         # make sure decode is happy
         ex.parse()
 
