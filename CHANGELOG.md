@@ -1,6 +1,42 @@
 # Changelog
 
 
+## v0.9.0 (2025-02-05)
+
+* Bump version to 0.9.0.
+
+* Remove irrelevant comment.
+
+* Update copyright, readme.
+
+* Update tests.
+
+* Drop python 3.8 support.
+
+* Refactor and finish the parser implementation (#9)
+
+  * feat: refactor and finish the parser implementation
+
+  * Complete SPS, PPS implementation
+  * Factorize and complete slice parsing in CodedSlice class
+  * Move verbose support in the main process
+  * add option --verbose-types to display only some NALU types
+
+  * feat: add set_allcallbacks helper function
+
+  * Add set_allcallbacks helper function to set all callbacks in one go
+  * Change the order of callback arguments to have the nalu first
+  * Fix a typo in h26x_parser.py
+
+  * test: update test.py
+
+  * docs(README): update README
+
+* Update README.
+
+* [feat] add parse VUI in SPS for h264 (#8)
+
+
 ## v0.8.1 (2023-01-08)
 
 * Bump version to 0.8.1.
