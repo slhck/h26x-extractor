@@ -115,6 +115,8 @@ sps = SPS(BitStream(nal_payload))
 sps.print_verbose()
 ```
 
+See the `test/test.py` file for more examples.
+
 ## Alternatives
 
 [h264bitstream](https://github.com/aizvorski/h264bitstream) is a proper H.264 parser.
@@ -129,7 +131,7 @@ ffmpeg -i video.h264 -c copy -bsf:v trace_headers -f null - 2> output.txt
 
 The MIT License (MIT)
 
-Copyright (c) 2017-2023 Werner Robitza
+Copyright (c) 2017-2025 h26x-extractor contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the
