@@ -35,7 +35,7 @@ class H26xParser:
     H.264 extractor for Annex B streams.
     """
 
-    VALID_CALLBACKS = ["sps", "pps", "slice", "aud", "nalu"]
+    VALID_CALLBACKS = ["sps", "pps", "slice", "aud", "prefix", "nalu"]
     startCodePrefixShort = b"\x00\x00\x01"
 
     def __init__(self, f, use_bitstream=None, nalu_types=[]):
@@ -80,7 +80,7 @@ class H26xParser:
                 rbsp_dec.append(rbsp_enc[i])
             i += 1
         return rbsp_dec
-    
+
     def set_allcallbacks(self, fun):
         """
         Set a callback function for all types of NALUs.
@@ -183,7 +183,7 @@ class H26xParser:
                 _start = start - 4
             else:
                 _start = start - 3
-            
+
             rbsp_payload = self.getRSBP(start + 1, end + 1)
 
             # Parse the current NALU
@@ -200,6 +200,9 @@ class H26xParser:
             elif type in [nalutypes.NAL_UNIT_TYPE_CODED_SLICE_NON_IDR, nalutypes.NAL_UNIT_TYPE_CODED_SLICE_IDR, nalutypes.NAL_UNIT_TYPE_CODED_SLICE_AUX]:
                 nalu_slice = nalutypes.CodedSlice(rbsp_payload_bs, nalu_sps, nalu_pps, type)
                 self.__call("slice", nalu_slice, type, _start, end)
+            elif type == nalutypes.NAL_UNIT_TYPE_PREFIX:
+                nalu_prefix = nalutypes.Prefix(rbsp_payload_bs)
+                self.__call("prefix", nalu_prefix, type, _start, end)
             else:
                 other = nalutypes.NALU(rbsp_payload_bs)
                 self.__call("nalu", other, type, _start, end)
