@@ -48,7 +48,8 @@ NAL_UNIT_TYPE_END_OF_SEQUENCE = 10  # End of sequence
 NAL_UNIT_TYPE_END_OF_STREAM = 11  # End of stream
 NAL_UNIT_TYPE_FILLER = 12  # Filler data
 NAL_UNIT_TYPE_SPS_EXT = 13  # Sequence parameter set extension
-# 14..18                                          # Reserved
+NAL_UNIT_TYPE_PREFIX = 14   # Prefix NAL unit, for Scalable video coding
+# 15..18                                          # Reserved
 NAL_UNIT_TYPE_CODED_SLICE_AUX = (
     19  # Coded slice of an auxiliary coded picture without partitioning
 )
@@ -91,6 +92,7 @@ def get_description(nal_unit_type):
         NAL_UNIT_TYPE_END_OF_STREAM: "End of stream",
         NAL_UNIT_TYPE_FILLER: "Filler data",
         NAL_UNIT_TYPE_SPS_EXT: "Sequence parameter set extension",
+        NAL_UNIT_TYPE_PREFIX: "Prefix NAL unit, for Scalable video coding",
         NAL_UNIT_TYPE_CODED_SLICE_AUX: "Coded slice of an auxiliary coded picture without partitioning",
     }.get(nal_unit_type, "unknown")
 
@@ -98,7 +100,7 @@ def parse_scaling_list(bitreader, sizeOfScalingList):
     """
     Parse a scaling list of size 'sizeOfScalingList' (16 for 4x4, 64 for 8x8)
     according to H.264/AVC spec (7.3.2.1.1).
-    
+
     :param bitreader: An object with a .read("se") method for reading signed Exp-Golomb.
     :param sizeOfScalingList: 16 (4x4) or 64 (8x8).
     :return: (scaling_list, use_default_scaling_matrix_flag)
@@ -115,7 +117,7 @@ def parse_scaling_list(bitreader, sizeOfScalingList):
             # ( +256 ) ensures we don't get a negative number modulo 256
             next_scale = (last_scale + delta_scale + 256) % 256
 
-        # If nextScale becomes 0 at the very first element, 
+        # If nextScale becomes 0 at the very first element,
         # useDefaultScalingMatrixFlag = 1 (fall back to default matrix).
         if i == 0 and next_scale == 0:
             use_default_scaling_matrix_flag = 1
@@ -277,7 +279,7 @@ class CodedSlice(NALU):
         if slice_type_mod_5 in (P_SLICE, SP_SLICE, B_SLICE):
             self.num_ref_idx_active_override_flag = self.s.read("uint:1")
             if self.num_ref_idx_active_override_flag:
-                self.num_ref_idx_l0_active_minus1 = self.s.read("ue") 
+                self.num_ref_idx_l0_active_minus1 = self.s.read("ue")
                 if slice_type_mod_5 == B_SLICE:
                     self.num_ref_idx_l1_active_minus1 = self.s.read("ue")
 
@@ -340,7 +342,7 @@ class CodedSlice(NALU):
             pic_size_in_map_units = (sps.pic_width_in_mbs_minus_1 + 1) * (sps.pic_height_in_map_units_minus_1 + 1)
             if (not sps.frame_mbs_only_flag):
                 pic_size_in_map_units *= 2
-                
+
             max_value = pic_size_in_map_units // (pps.slice_group_change_rate_minus1 + 1)
             bits_for_slice_group_change_cycle = math.ceil(math.log2(max_value + 1))
             self.slice_group_change_cycle = self.s.read(f"uint:{bits_for_slice_group_change_cycle}")
@@ -579,6 +581,22 @@ class SPS(NALU):
                 self.sar_width = self.s.read("uint:16")
                 self.sar_height = self.s.read("uint:16")
 
+        self.overscan_info_present_flag = self.s.read('uint:1')
+        if self.overscan_info_present_flag:
+            self.overscan_appropriate_flag = self.s.read('uint:1')
+        self.video_signal_type_present_flag = self.s.read('uint:1')
+        if self.video_signal_type_present_flag:
+            self.video_format = self.s.read('uint:3')
+            self.video_full_range_flag = self.s.read('uint:1')
+            self.colour_description_present_flag = self.s.read('uint:1')
+            if self.colour_description_present_flag:
+                self.colour_primaries = self.s.read('uint:8')
+                self.transfer_characteristics = self.s.read('uint:8')
+                self.matrix_coefficients = self.s.read('uint:8')
+        self.chroma_loc_info_present_flag = self.s.read('uint:1')
+        if self.chroma_loc_info_present_flag:
+            self.chroma_sample_loc_type_top_field = self.s.read('ue')
+            self.chroma_sample_loc_type_bottom_field = self.s.read('ue')
         self.timing_info_present_flag = self.s.read("uint:1")
         if self.timing_info_present_flag:
             self.num_units_in_tick = self.s.read("uint:32")
@@ -588,6 +606,23 @@ class SPS(NALU):
         self.nal_hrd_parameters_present_flag = self.s.read("uint:1")
         if self.nal_hrd_parameters_present_flag:
             self.parse_hrd_parameters()
+
+        self.vcl_hrd_parameters_present_flag = self.s.read('uint:1')
+        if self.vcl_hrd_parameters_present_flag:
+            self.parse_hrd_parameters()
+
+        if self.nal_hrd_parameters_present_flag or self.vcl_hrd_parameters_present_flag:
+            self.low_delay_hrd_flag = self.s.read('uint:1')
+        self.pic_struct_present_flag = self.s.read('uint:1')
+        self.bitstream_restriction_flag = self.s.read('uint:1')
+        if self.bitstream_restriction_flag:
+            self.motion_vectors_over_pic_boundaries_flag = self.s.read('uint:1')
+            self.max_bytes_per_pic_denom = self.s.read('ue')
+            self.max_bits_per_mb_denom = self.s.read('ue')
+            self.log2_max_mv_length_horizontal = self.s.read('ue')
+            self.log2_max_mv_length_vertical = self.s.read('ue')
+            self.max_num_reorder_frames = self.s.read('ue')
+            self.max_dec_frame_buffering = self.s.read('ue')
 
     def parse_hrd_parameters(self):
         """
@@ -606,6 +641,10 @@ class SPS(NALU):
             self.cpb_size_value_minus1.append(self.s.read("ue"))
             self.cbr_flag.append(self.s.read("uint:1"))
 
+        self.initial_cpb_removal_delay_length_minus1 = self.s.read("uint:5")
+        self.cpb_removal_delay_length_minus1 = self.s.read("uint:5")
+        self.dpb_output_delay_length_minus1 = self.s.read("uint:5")
+        self.time_offset_length = self.s.read("uint:5")
 
 class PPS(NALU):
     def __init__(self, rbsp_bytes):
@@ -702,7 +741,7 @@ class PPS(NALU):
         self.pic_scaling_list_present_flag = []
         self.second_chroma_qp_index_offset = None
 
-        # The specification says: if(more_rbsp_data()) { ... } 
+        # The specification says: if(more_rbsp_data()) { ... }
         # (i.e., additional bits in PPS for High Profile / extended features)
         if self.s.pos <= len(self.s) - 8:
             self.transform_8x8_mode_flag = self.s.read("uint:1")
@@ -727,3 +766,37 @@ class PPS(NALU):
 
         # Optionally handle rbsp_trailing_bits() if your parser requires it
         # e.g. self.s.rbsp_trailing_bits()
+
+class Prefix(NALU):
+    """
+    Prefix NAL unit, for Scalable video coding.
+    """
+
+    def __init__(self, rbsp_bytes):
+        order = [
+            "svc_extension_flag",
+            "idr_flag",
+            "priority_id",
+            "no_inter_layer_pred_flag",
+            "dependency_id",
+            "quality_id",
+            "temporal_id",
+            "use_ref_base_pic_flag",
+            "discardable_flag",
+            "output_flag",
+            "reserved_three_2bits",
+        ]
+        super(Prefix, self).__init__(rbsp_bytes, order)
+
+        self.svc_extension_flag = self.s.read("uint:1")
+        if self.svc_extension_flag:
+            self.idr_flag = self.s.read("uint:1")
+            self.priority_id = self.s.read("uint:6")
+            self.no_inter_layer_pred_flag = self.s.read("uint:1")   # shall be equal to 1 in prefix NAL units
+            self.dependency_id = self.s.read("uint:3")              # shall be equal to 0 in prefix NAL units
+            self.quality_id = self.s.read("uint:4")                 # shall be equal to 0 in prefix NAL units
+            self.temporal_id = self.s.read("uint:3")
+            self.use_ref_base_pic_flag = self.s.read("uint:1")
+            self.discardable_flag = self.s.read("uint:1")
+            self.output_flag = self.s.read("uint:1")
+            self.reserved_three_2bits = self.s.read("uint:2")       # shall be equal to 3
