@@ -1,6 +1,23 @@
 # Changelog
 
 
+## v0.10.0 (2025-03-08)
+
+* Bump version to 0.10.0.
+
+* Update readme.
+
+* Add temporal SVC parse, fix vui parse (#10)
+
+  * [feat] add h264 temporal SVC parse
+
+  * [fix] fix vui parse
+
+* Fix PEP 625 naming.
+
+* Link to API docs.
+
+
 ## v0.9.0 (2025-02-05)
 
 * Bump version to 0.9.0.
