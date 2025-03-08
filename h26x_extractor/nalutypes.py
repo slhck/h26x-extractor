@@ -581,6 +581,22 @@ class SPS(NALU):
                 self.sar_width = self.s.read("uint:16")
                 self.sar_height = self.s.read("uint:16")
 
+        self.overscan_info_present_flag = self.s.read('uint:1')
+        if self.overscan_info_present_flag:
+            self.overscan_appropriate_flag = self.s.read('uint:1')
+        self.video_signal_type_present_flag = self.s.read('uint:1')
+        if self.video_signal_type_present_flag:
+            self.video_format = self.s.read('uint:3')
+            self.video_full_range_flag = self.s.read('uint:1')
+            self.colour_description_present_flag = self.s.read('uint:1')
+            if self.colour_description_present_flag:
+                self.colour_primaries = self.s.read('uint:8')
+                self.transfer_characteristics = self.s.read('uint:8')
+                self.matrix_coefficients = self.s.read('uint:8')
+        self.chroma_loc_info_present_flag = self.s.read('uint:1')
+        if self.chroma_loc_info_present_flag:
+            self.chroma_sample_loc_type_top_field = self.s.read('ue')
+            self.chroma_sample_loc_type_bottom_field = self.s.read('ue')
         self.timing_info_present_flag = self.s.read("uint:1")
         if self.timing_info_present_flag:
             self.num_units_in_tick = self.s.read("uint:32")
@@ -590,6 +606,23 @@ class SPS(NALU):
         self.nal_hrd_parameters_present_flag = self.s.read("uint:1")
         if self.nal_hrd_parameters_present_flag:
             self.parse_hrd_parameters()
+
+        self.vcl_hrd_parameters_present_flag = self.s.read('uint:1')
+        if self.vcl_hrd_parameters_present_flag:
+            self.parse_hrd_parameters()
+
+        if self.nal_hrd_parameters_present_flag or self.vcl_hrd_parameters_present_flag:
+            self.low_delay_hrd_flag = self.s.read('uint:1')
+        self.pic_struct_present_flag = self.s.read('uint:1')
+        self.bitstream_restriction_flag = self.s.read('uint:1')
+        if self.bitstream_restriction_flag:
+            self.motion_vectors_over_pic_boundaries_flag = self.s.read('uint:1')
+            self.max_bytes_per_pic_denom = self.s.read('ue')
+            self.max_bits_per_mb_denom = self.s.read('ue')
+            self.log2_max_mv_length_horizontal = self.s.read('ue')
+            self.log2_max_mv_length_vertical = self.s.read('ue')
+            self.max_num_reorder_frames = self.s.read('ue')
+            self.max_dec_frame_buffering = self.s.read('ue')
 
     def parse_hrd_parameters(self):
         """
@@ -608,6 +641,10 @@ class SPS(NALU):
             self.cpb_size_value_minus1.append(self.s.read("ue"))
             self.cbr_flag.append(self.s.read("uint:1"))
 
+        self.initial_cpb_removal_delay_length_minus1 = self.s.read("uint:5")
+        self.cpb_removal_delay_length_minus1 = self.s.read("uint:5")
+        self.dpb_output_delay_length_minus1 = self.s.read("uint:5")
+        self.time_offset_length = self.s.read("uint:5")
 
 class PPS(NALU):
     def __init__(self, rbsp_bytes):
