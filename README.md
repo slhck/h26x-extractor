@@ -35,6 +35,7 @@ Currently supported:
 - Parsing of CodedSlice(s)
 - Parsing of SPS
 - Parsing of PPS
+- Parsing of Prefix for Scalable Video Coding
 
 Currently planned:
 
@@ -108,6 +109,7 @@ The callback is called for each type of info found. Valid callbacks are:
 - `slice`
 - `aud`
 - `nalu`
+- `prefix`
 
 The callback returns an instance of the NALU type. You can access the `s` property to get the whole data including the RBSP.
 You can use the `set_allcallbacks` method to set callbacks for all types.
