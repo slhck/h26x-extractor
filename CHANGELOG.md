@@ -1,6 +1,17 @@
 # Changelog
 
 
+## v0.10.1 (2025-09-01)
+
+* Bump version to 0.10.1.
+
+* Migrate to uv and modern package structure.
+
+* Changed license specifier.
+
+* Removed wheel settings from setup.cfg.
+
+
 ## v0.10.0 (2025-03-08)
 
 * Bump version to 0.10.0.
