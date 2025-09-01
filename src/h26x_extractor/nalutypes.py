@@ -48,7 +48,7 @@ NAL_UNIT_TYPE_END_OF_SEQUENCE = 10  # End of sequence
 NAL_UNIT_TYPE_END_OF_STREAM = 11  # End of stream
 NAL_UNIT_TYPE_FILLER = 12  # Filler data
 NAL_UNIT_TYPE_SPS_EXT = 13  # Sequence parameter set extension
-NAL_UNIT_TYPE_PREFIX = 14   # Prefix NAL unit, for Scalable video coding
+NAL_UNIT_TYPE_PREFIX = 14  # Prefix NAL unit, for Scalable video coding
 # 15..18                                          # Reserved
 NAL_UNIT_TYPE_CODED_SLICE_AUX = (
     19  # Coded slice of an auxiliary coded picture without partitioning
@@ -63,6 +63,7 @@ I_SLICE = 2
 SP_SLICE = 3
 SI_SLICE = 4
 
+
 def get_slice_type_str(slice_type_mod_5):
     """
     Simple helper to decode slice_type into a human-readable string.
@@ -72,6 +73,7 @@ def get_slice_type_str(slice_type_mod_5):
     """
     mapping = {0: "P", 1: "B", 2: "I", 3: "SP", 4: "SI"}
     return mapping[slice_type_mod_5]
+
 
 def get_description(nal_unit_type):
     """
@@ -95,6 +97,7 @@ def get_description(nal_unit_type):
         NAL_UNIT_TYPE_PREFIX: "Prefix NAL unit, for Scalable video coding",
         NAL_UNIT_TYPE_CODED_SLICE_AUX: "Coded slice of an auxiliary coded picture without partitioning",
     }.get(nal_unit_type, "unknown")
+
 
 def parse_scaling_list(bitreader, sizeOfScalingList):
     """
@@ -130,6 +133,7 @@ def parse_scaling_list(bitreader, sizeOfScalingList):
             last_scale = next_scale
 
     return scaling_list, use_default_scaling_matrix_flag
+
 
 class NALU(object):
     """
@@ -175,6 +179,7 @@ class AUD(NALU):
 
         self.primary_pic_type = self.s.read("uint:3")
 
+
 class CodedSlice(NALU):
     """
     A unified coded slice parser for IDR and non-IDR pictures.
@@ -195,20 +200,32 @@ class CodedSlice(NALU):
         """
 
         order = [
-            "first_mb_in_slice", "slice_type", "slice_type_str",
-            "pic_parameter_set_id", "colour_plane_id",
-            "frame_num", "field_pic_flag", "bottom_field_flag",
-            "idr_pic_id", "pic_order_cnt_lsb", "delta_pic_order_cnt_bottom",
-            "delta_pic_order_cnt", "redundant_pic_cnt",
-            "direct_spatial_mv_pred_flag", "num_ref_idx_active_override_flag",
-            "num_ref_idx_l0_active_minus1", "num_ref_idx_l1_active_minus1",
-            "slice_qp_delta", "disable_deblocking_filter_idc",
-            "slice_alpha_c0_offset_div2", "slice_beta_offset_div2",
+            "first_mb_in_slice",
+            "slice_type",
+            "slice_type_str",
+            "pic_parameter_set_id",
+            "colour_plane_id",
+            "frame_num",
+            "field_pic_flag",
+            "bottom_field_flag",
+            "idr_pic_id",
+            "pic_order_cnt_lsb",
+            "delta_pic_order_cnt_bottom",
+            "delta_pic_order_cnt",
+            "redundant_pic_cnt",
+            "direct_spatial_mv_pred_flag",
+            "num_ref_idx_active_override_flag",
+            "num_ref_idx_l0_active_minus1",
+            "num_ref_idx_l1_active_minus1",
+            "slice_qp_delta",
+            "disable_deblocking_filter_idc",
+            "slice_alpha_c0_offset_div2",
+            "slice_beta_offset_div2",
         ]
         super(CodedSlice, self).__init__(rbsp_bytes, order)
 
         # Detect if this is an IDR slice
-        self.is_idr = (nal_unit_type == 5)
+        self.is_idr = nal_unit_type == 5
 
         # Track the start bit for slice header size
         start_bits = self.s.pos
@@ -253,12 +270,18 @@ class CodedSlice(NALU):
             self.pic_order_cnt_lsb = self.s.read(f"uint:{poc_lsb_bits}")
 
             # delta_pic_order_cnt_bottom if pps.pic_order_present_flag == 1
-            if pps.pic_order_present_flag and not (self.field_pic_flag and self.bottom_field_flag):
+            if pps.pic_order_present_flag and not (
+                self.field_pic_flag and self.bottom_field_flag
+            ):
                 self.delta_pic_order_cnt_bottom = self.s.read("se")
 
-        elif sps.pic_order_cnt_type == 1 and not getattr(sps, "delta_pic_order_always_zero_flag", 0):
+        elif sps.pic_order_cnt_type == 1 and not getattr(
+            sps, "delta_pic_order_always_zero_flag", 0
+        ):
             self.delta_pic_order_cnt[0] = self.s.read("se")
-            if pps.pic_order_present_flag and not (self.field_pic_flag and self.bottom_field_flag):
+            if pps.pic_order_present_flag and not (
+                self.field_pic_flag and self.bottom_field_flag
+            ):
                 self.delta_pic_order_cnt[1] = self.s.read("se")
 
         # 7) redundant_pic_cnt (if pps.redundant_pic_cnt_present_flag)
@@ -288,8 +311,9 @@ class CodedSlice(NALU):
             self._parse_ref_pic_list_modification(slice_type_mod_5)
 
         # 11) pred_weight_table (if relevant)
-        if ((slice_type_mod_5 in (P_SLICE, SP_SLICE) and pps.weighted_pred_flag) or
-            (slice_type_mod_5 == B_SLICE and pps.weighted_bipred_idc == 1)):
+        if (slice_type_mod_5 in (P_SLICE, SP_SLICE) and pps.weighted_pred_flag) or (
+            slice_type_mod_5 == B_SLICE and pps.weighted_bipred_idc == 1
+        ):
             self._parse_pred_weight_table(sps, pps)
 
         # 12) dec_ref_pic_marking
@@ -304,7 +328,10 @@ class CodedSlice(NALU):
             self._parse_dec_ref_pic_marking()
 
         # 13) cabac_init_idc (if pps.entropy_coding_mode_flag == 1 and slice_type != I/ SI)
-        if pps.entropy_coding_mode_flag == 1 and slice_type_mod_5 not in (I_SLICE, SI_SLICE):
+        if pps.entropy_coding_mode_flag == 1 and slice_type_mod_5 not in (
+            I_SLICE,
+            SI_SLICE,
+        ):
             self.cabac_init_idc = self.s.read("ue")
         else:
             self.cabac_init_idc = None
@@ -337,15 +364,21 @@ class CodedSlice(NALU):
             self.slice_beta_offset_div2 = 0
 
         # 17) slice_group_change_cycle
-        if pps.num_slice_groups_minus1 > 0 and pps.slice_group_map_type in [3,4,5]:
+        if pps.num_slice_groups_minus1 > 0 and pps.slice_group_map_type in [3, 4, 5]:
             # We need to compute PicSizeInMapUnits from the SPS because it's not in the PPS when slice_group_map_type is 3,4,5
-            pic_size_in_map_units = (sps.pic_width_in_mbs_minus_1 + 1) * (sps.pic_height_in_map_units_minus_1 + 1)
-            if (not sps.frame_mbs_only_flag):
+            pic_size_in_map_units = (sps.pic_width_in_mbs_minus_1 + 1) * (
+                sps.pic_height_in_map_units_minus_1 + 1
+            )
+            if not sps.frame_mbs_only_flag:
                 pic_size_in_map_units *= 2
 
-            max_value = pic_size_in_map_units // (pps.slice_group_change_rate_minus1 + 1)
+            max_value = pic_size_in_map_units // (
+                pps.slice_group_change_rate_minus1 + 1
+            )
             bits_for_slice_group_change_cycle = math.ceil(math.log2(max_value + 1))
-            self.slice_group_change_cycle = self.s.read(f"uint:{bits_for_slice_group_change_cycle}")
+            self.slice_group_change_cycle = self.s.read(
+                f"uint:{bits_for_slice_group_change_cycle}"
+            )
 
         # End bit position of slice header
         end_bits = self.s.pos
@@ -424,11 +457,11 @@ class CodedSlice(NALU):
                 memory_management_control_operation = self.s.read("ue")
                 if memory_management_control_operation == 0:
                     break
-                if memory_management_control_operation in [1,3]:
+                if memory_management_control_operation in [1, 3]:
                     _difference_of_pic_nums_minus1 = self.s.read("ue")
                 if memory_management_control_operation == 2:
                     _long_term_pic_num = self.s.read("ue")
-                if memory_management_control_operation in [3,6]:
+                if memory_management_control_operation in [3, 6]:
                     _long_term_frame_idx = self.s.read("ue")
                 if memory_management_control_operation == 4:
                     _max_long_term_frame_idx_plus1 = self.s.read("ue")
@@ -444,6 +477,7 @@ class CodedSlice(NALU):
         Returns the slice payload size in **bytes**, rounded up from bits.
         """
         return (len(self.s) - self._slice_header_size_bits) // 8
+
 
 class SPS(NALU):
     """
@@ -509,7 +543,19 @@ class SPS(NALU):
         self.seq_parameter_set_id = self.s.read("ue")
 
         if self.profile_idc in [
-            100, 110, 122, 244, 44, 83, 86, 118, 128, 138, 139, 134, 135
+            100,
+            110,
+            122,
+            244,
+            44,
+            83,
+            86,
+            118,
+            128,
+            138,
+            139,
+            134,
+            135,
         ]:
             self.chroma_format_idc = self.s.read("ue")
             if self.chroma_format_idc == 3:
@@ -581,22 +627,22 @@ class SPS(NALU):
                 self.sar_width = self.s.read("uint:16")
                 self.sar_height = self.s.read("uint:16")
 
-        self.overscan_info_present_flag = self.s.read('uint:1')
+        self.overscan_info_present_flag = self.s.read("uint:1")
         if self.overscan_info_present_flag:
-            self.overscan_appropriate_flag = self.s.read('uint:1')
-        self.video_signal_type_present_flag = self.s.read('uint:1')
+            self.overscan_appropriate_flag = self.s.read("uint:1")
+        self.video_signal_type_present_flag = self.s.read("uint:1")
         if self.video_signal_type_present_flag:
-            self.video_format = self.s.read('uint:3')
-            self.video_full_range_flag = self.s.read('uint:1')
-            self.colour_description_present_flag = self.s.read('uint:1')
+            self.video_format = self.s.read("uint:3")
+            self.video_full_range_flag = self.s.read("uint:1")
+            self.colour_description_present_flag = self.s.read("uint:1")
             if self.colour_description_present_flag:
-                self.colour_primaries = self.s.read('uint:8')
-                self.transfer_characteristics = self.s.read('uint:8')
-                self.matrix_coefficients = self.s.read('uint:8')
-        self.chroma_loc_info_present_flag = self.s.read('uint:1')
+                self.colour_primaries = self.s.read("uint:8")
+                self.transfer_characteristics = self.s.read("uint:8")
+                self.matrix_coefficients = self.s.read("uint:8")
+        self.chroma_loc_info_present_flag = self.s.read("uint:1")
         if self.chroma_loc_info_present_flag:
-            self.chroma_sample_loc_type_top_field = self.s.read('ue')
-            self.chroma_sample_loc_type_bottom_field = self.s.read('ue')
+            self.chroma_sample_loc_type_top_field = self.s.read("ue")
+            self.chroma_sample_loc_type_bottom_field = self.s.read("ue")
         self.timing_info_present_flag = self.s.read("uint:1")
         if self.timing_info_present_flag:
             self.num_units_in_tick = self.s.read("uint:32")
@@ -607,22 +653,22 @@ class SPS(NALU):
         if self.nal_hrd_parameters_present_flag:
             self.parse_hrd_parameters()
 
-        self.vcl_hrd_parameters_present_flag = self.s.read('uint:1')
+        self.vcl_hrd_parameters_present_flag = self.s.read("uint:1")
         if self.vcl_hrd_parameters_present_flag:
             self.parse_hrd_parameters()
 
         if self.nal_hrd_parameters_present_flag or self.vcl_hrd_parameters_present_flag:
-            self.low_delay_hrd_flag = self.s.read('uint:1')
-        self.pic_struct_present_flag = self.s.read('uint:1')
-        self.bitstream_restriction_flag = self.s.read('uint:1')
+            self.low_delay_hrd_flag = self.s.read("uint:1")
+        self.pic_struct_present_flag = self.s.read("uint:1")
+        self.bitstream_restriction_flag = self.s.read("uint:1")
         if self.bitstream_restriction_flag:
-            self.motion_vectors_over_pic_boundaries_flag = self.s.read('uint:1')
-            self.max_bytes_per_pic_denom = self.s.read('ue')
-            self.max_bits_per_mb_denom = self.s.read('ue')
-            self.log2_max_mv_length_horizontal = self.s.read('ue')
-            self.log2_max_mv_length_vertical = self.s.read('ue')
-            self.max_num_reorder_frames = self.s.read('ue')
-            self.max_dec_frame_buffering = self.s.read('ue')
+            self.motion_vectors_over_pic_boundaries_flag = self.s.read("uint:1")
+            self.max_bytes_per_pic_denom = self.s.read("ue")
+            self.max_bits_per_mb_denom = self.s.read("ue")
+            self.log2_max_mv_length_horizontal = self.s.read("ue")
+            self.log2_max_mv_length_vertical = self.s.read("ue")
+            self.max_num_reorder_frames = self.s.read("ue")
+            self.max_dec_frame_buffering = self.s.read("ue")
 
     def parse_hrd_parameters(self):
         """
@@ -645,6 +691,7 @@ class SPS(NALU):
         self.cpb_removal_delay_length_minus1 = self.s.read("uint:5")
         self.dpb_output_delay_length_minus1 = self.s.read("uint:5")
         self.time_offset_length = self.s.read("uint:5")
+
 
 class PPS(NALU):
     def __init__(self, rbsp_bytes):
@@ -708,7 +755,9 @@ class PPS(NALU):
             elif self.slice_group_map_type == 6:
                 self.pic_size_in_map_units_minus1 = self.s.read("ue")
                 # slice_group_id uses ceil(log2(num_slice_groups_minus1 + 1)) bits per entry
-                bits_for_slice_group_id = int(math.ceil(math.log2(self.num_slice_groups_minus1 + 1)))
+                bits_for_slice_group_id = int(
+                    math.ceil(math.log2(self.num_slice_groups_minus1 + 1))
+                )
                 self.slice_group_id = []
                 for _ in range(self.pic_size_in_map_units_minus1 + 1):
                     self.slice_group_id.append(
@@ -767,6 +816,7 @@ class PPS(NALU):
         # Optionally handle rbsp_trailing_bits() if your parser requires it
         # e.g. self.s.rbsp_trailing_bits()
 
+
 class Prefix(NALU):
     """
     Prefix NAL unit, for Scalable video coding.
@@ -792,11 +842,17 @@ class Prefix(NALU):
         if self.svc_extension_flag:
             self.idr_flag = self.s.read("uint:1")
             self.priority_id = self.s.read("uint:6")
-            self.no_inter_layer_pred_flag = self.s.read("uint:1")   # shall be equal to 1 in prefix NAL units
-            self.dependency_id = self.s.read("uint:3")              # shall be equal to 0 in prefix NAL units
-            self.quality_id = self.s.read("uint:4")                 # shall be equal to 0 in prefix NAL units
+            self.no_inter_layer_pred_flag = self.s.read(
+                "uint:1"
+            )  # shall be equal to 1 in prefix NAL units
+            self.dependency_id = self.s.read(
+                "uint:3"
+            )  # shall be equal to 0 in prefix NAL units
+            self.quality_id = self.s.read(
+                "uint:4"
+            )  # shall be equal to 0 in prefix NAL units
             self.temporal_id = self.s.read("uint:3")
             self.use_ref_base_pic_flag = self.s.read("uint:1")
             self.discardable_flag = self.s.read("uint:1")
             self.output_flag = self.s.read("uint:1")
-            self.reserved_three_2bits = self.s.read("uint:2")       # shall be equal to 3
+            self.reserved_three_2bits = self.s.read("uint:2")  # shall be equal to 3

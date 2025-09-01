@@ -16,14 +16,37 @@ Contents:
 - [Programmatic usage (API)](#programmatic-usage-api)
 - [API](#api)
 - [Alternatives](#alternatives)
+- [License](#license)
 
 ## Installation
 
 Requirements: Python 3.9 or higher
 
+Via [uv](https://docs.astral.sh/uv/getting-started/installation/):
+
+```bash
+uvx h26x-extractor
+```
+
+Via [pipx](https://pipx.pypa.io/latest/installation/):
+
+```bash
+pipx install h26x-extractor
+```
+
 Via pip:
 
-    pip3 install h26x_extractor
+```bash
+pip3 install --user h26x_extractor
+```
+
+For development, clone the repository and install with uv:
+
+```bash
+git clone https://github.com/slhck/h26x-extractor
+cd h26x-extractor
+uv sync
+```
 
 ## Status
 
@@ -44,13 +67,17 @@ Currently planned:
 
 ## Usage
 
-If you installed the program via pip, you can run it directly:
+If you installed the program, you can run it directly:
 
-    h26x-extractor [options] <input-file>...
+```bash
+h26x-extractor [options] <input-file>...
+```
 
-Otherwise you can clone this repo and run it via:
+For development, you can also run it via:
 
-    python3 -m h26x_extractor [options] <input-file>...
+```bash
+uv run h26x-extractor [options] <input-file>...
+```
 
 You can pass the `-v` flag to enable verbose output, e.g. the following. You will get, for each NAL unit:
 
@@ -64,22 +91,24 @@ You can pass the `-v` flag to enable verbose output, e.g. the following. You wil
 
 Example:
 
-    NALU bytepos:   [0, 28]
-    NALU offset:    0 Bytes
-    NALU length:    29 Bytes (including start code)
-    NALU type:      7 (Sequence parameter set)
-    NALU bytes:     0x0000000167f4000d919b28283f6022000003000200000300641e28532c
-    NALU RBSP:      0xf4000d919b28283f602200000002000000641e28532c
+```
+NALU bytepos:   [0, 28]
+NALU offset:    0 Bytes
+NALU length:    29 Bytes (including start code)
+NALU type:      7 (Sequence parameter set)
+NALU bytes:     0x0000000167f4000d919b28283f6022000003000200000300641e28532c
+NALU RBSP:      0xf4000d919b28283f602200000002000000641e28532c
 
-    SPS (payload size: 22.0 Bytes)
-    +--------------------------------------+---------+
-    | field                                | value   |
-    +======================================+=========+
-    | constraint_set0_flag                 | 0       |
-    +--------------------------------------+---------+
-    | constraint_set1_flag                 | 0       |
-    +--------------------------------------+---------+
-    ....
+SPS (payload size: 22.0 Bytes)
++--------------------------------------+---------+
+| field                                | value   |
++======================================+=========+
+| constraint_set0_flag                 | 0       |
++--------------------------------------+---------+
+| constraint_set1_flag                 | 0       |
++--------------------------------------+---------+
+....
+```
 
 ## Programmatic usage (API)
 
@@ -125,7 +154,7 @@ sps = SPS(BitStream(nal_payload))
 sps.print_verbose()
 ```
 
-See the `test/test.py` file for more examples.
+See the `tests/test_h26x_extractor.py` file for more examples.
 
 ## Alternatives
 
@@ -133,11 +162,11 @@ See the `test/test.py` file for more examples.
 
 FFmpeg can also parse bitstream data:
 
-```
+```bash
 ffmpeg -i video.h264 -c copy -bsf:v trace_headers -f null - 2> output.txt
 ```
 
-# License
+## License
 
 The MIT License (MIT)
 

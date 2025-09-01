@@ -11,6 +11,7 @@ Options:
 Example:
   h26x-extractor -t 1,5,7 file1.264 file2.264
 """
+
 import time
 from docopt import docopt
 from functools import partial
@@ -28,10 +29,11 @@ if args["--verbose-types"]:
     except ValueError:
         print("Error: --verbose-types must be a comma-separated list of integers")
         exit(1)
-elif (args["--verbose"]):
+elif args["--verbose"]:
     # Add all types
     for i in range(32):
         nalu_types.append(i)
+
 
 def print_nalu(parser, nalu: nalutypes.NALU, type, start, end):
     """
@@ -40,7 +42,7 @@ def print_nalu(parser, nalu: nalutypes.NALU, type, start, end):
 
     if type not in nalu_types:
         return
-    
+
     print("")
     print(
         "========================================================================================================"
@@ -48,18 +50,8 @@ def print_nalu(parser, nalu: nalutypes.NALU, type, start, end):
     print("")
     print("NALU bytepos:\t[" + str(start) + ", " + str(end) + "]")
     print("NALU offset:\t" + str(start) + " Bytes")
-    print(
-        "NALU length:\t"
-        + str(end - start + 1)
-        + " Bytes (including start code)"
-    )
-    print(
-        "NALU type:\t"
-        + str(type)
-        + " ("
-        + nalutypes.get_description(type)
-        + ")"
-    )
+    print("NALU length:\t" + str(end - start + 1) + " Bytes (including start code)")
+    print("NALU type:\t" + str(type) + " (" + nalutypes.get_description(type) + ")")
 
     substr = parser.byte_stream[start : end + 1].hex()
     if len(substr) > 250:
@@ -73,14 +65,15 @@ def print_nalu(parser, nalu: nalutypes.NALU, type, start, end):
 
     nalu.print_verbose()
 
+
 def main():
     for f in args["<input-file>"]:
-        
         # This is a good example of how to use the h26x_parser module
         # and how to set up callbacks for every NALU types.
         parser = h26x_parser.H26xParser(f)
         parser.set_allcallbacks(partial(print_nalu, parser))
         parser.parse()
+
 
 if __name__ == "__main__":
     start = time.time()

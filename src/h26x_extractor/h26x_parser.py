@@ -197,8 +197,14 @@ class H26xParser:
             elif type == nalutypes.NAL_UNIT_TYPE_AUD:
                 aud = nalutypes.AUD(rbsp_payload_bs)
                 self.__call("aud", aud, type, _start, end)
-            elif type in [nalutypes.NAL_UNIT_TYPE_CODED_SLICE_NON_IDR, nalutypes.NAL_UNIT_TYPE_CODED_SLICE_IDR, nalutypes.NAL_UNIT_TYPE_CODED_SLICE_AUX]:
-                nalu_slice = nalutypes.CodedSlice(rbsp_payload_bs, nalu_sps, nalu_pps, type)
+            elif type in [
+                nalutypes.NAL_UNIT_TYPE_CODED_SLICE_NON_IDR,
+                nalutypes.NAL_UNIT_TYPE_CODED_SLICE_IDR,
+                nalutypes.NAL_UNIT_TYPE_CODED_SLICE_AUX,
+            ]:
+                nalu_slice = nalutypes.CodedSlice(
+                    rbsp_payload_bs, nalu_sps, nalu_pps, type
+                )
                 self.__call("slice", nalu_slice, type, _start, end)
             elif type == nalutypes.NAL_UNIT_TYPE_PREFIX:
                 nalu_prefix = nalutypes.Prefix(rbsp_payload_bs)

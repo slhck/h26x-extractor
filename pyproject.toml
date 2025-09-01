@@ -1,0 +1,53 @@
+[build-system]
+requires = ["uv_build>=0.8.14,<0.9.0"]
+build-backend = "uv_build"
+
+[project]
+name = "h26x_extractor"
+version = "0.10.0"
+description = "Extract NAL units from H.264 bitstreams"
+authors = [{name = "Werner Robitza", email = "werner.robitza@gmail.com"}]
+license = "MIT"
+license-files = ["LICENSE.md"]
+readme = "README.md"
+requires-python = ">=3.9"
+keywords = ["video", "h264"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Multimedia :: Video",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+    "docopt",
+    "tabulate",
+    "bitstring",
+]
+
+[project.urls]
+Homepage = "https://github.com/slhck/h26x-extractor"
+Repository = "https://github.com/slhck/h26x-extractor"
+
+[project.scripts]
+h26x-extractor = "h26x_extractor.__main__:main"
+
+[dependency-groups]
+dev = [
+    "pytest >=8.1.1,<9",
+    "ruff>=0.12.11",
+    "mypy",
+    "types-tabulate",
+    "pdoc>=15.0.4",
+]
+
+[tool.mypy]
+python_version = "3.13"
+ignore_missing_imports = true
+exclude = ["build"]
