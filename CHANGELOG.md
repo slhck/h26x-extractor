@@ -1,3 +1,19 @@
+## [0.11.0] - 2026-01-08
+
+### 🚀 Features
+
+- Change output format to JSON by default
+
+### ⚙️ Miscellaneous Tasks
+
+- Remove gitchangelog templates
+- Update support to python 3.15
+- Test only Python 3.9 and 3.15
+- Bump version to 0.11.0
+
+### ◀️ Revert
+
+- Use Python 3.14 instead of 3.15
 ## [0.10.2] - 2025-10-17
 
 ### ⚙️ Miscellaneous Tasks
