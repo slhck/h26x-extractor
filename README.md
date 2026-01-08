@@ -13,6 +13,10 @@ Contents:
 - [Installation](#installation)
 - [Status](#status)
 - [Usage](#usage)
+  - [Output Format](#output-format)
+  - [Options](#options)
+  - [Examples](#examples)
+  - [Human-Readable Output](#human-readable-output)
 - [Programmatic usage (API)](#programmatic-usage-api)
 - [API](#api)
 - [Alternatives](#alternatives)
@@ -67,10 +71,10 @@ Currently planned:
 
 ## Usage
 
-If you installed the program, you can run it directly:
+If you use `uvx` you can run it directly without installation:
 
 ```bash
-h26x-extractor [options] <input-file>...
+uvx h26x-extractor [options] <input-file>...
 ```
 
 For development, you can also run it via:
@@ -79,7 +83,94 @@ For development, you can also run it via:
 uv run h26x-extractor [options] <input-file>...
 ```
 
-You can pass the `-v` flag to enable verbose output, e.g. the following. You will get, for each NAL unit:
+Detailed usage options:
+
+```
+h26x-extractor
+
+Usage:
+  h26x-extractor [options] <input-file>...
+
+Options:
+  -v --verbose                   Enable human-readable output to stderr for all NALU types.
+  -t --verbose-types TYPES       Comma-separated list of NALU types for human-readable output.
+  -o --output-file FILE          Write JSON output to FILE instead of stdout.
+
+Output:
+  By default, JSON output is written to stdout.
+  Use -v or -t to additionally print human-readable output to stderr.
+
+Example:
+  h26x-extractor file1.264 file2.264
+  h26x-extractor -v file.264 2>/dev/null  # JSON only
+  h26x-extractor -v file.264 > /dev/null  # Human-readable only
+  h26x-extractor -o output.json file.264
+```
+
+### Output Format
+
+By default, h26x-extractor outputs JSON to stdout, which is suitable for automation and piping to other tools:
+
+```bash
+h26x-extractor video.264
+```
+
+Example JSON output:
+
+```json
+[
+  {
+    "input_file": "video.264",
+    "position": {
+      "start": 0,
+      "end": 28,
+      "length": 29
+    },
+    "type": 7,
+    "type_name": "Sequence parameter set",
+    "nalu_bytes": "0000000167...",
+    "rbsp_bytes": "67...",
+    "fields": {
+      "profile_idc": 100,
+      "level_idc": 31,
+      ...
+    }
+  },
+  ...
+]
+```
+
+### Options
+
+- `-o FILE`, `--output-file FILE`: Write JSON output to a file instead of stdout
+- `-v`, `--verbose`: Enable human-readable output to stderr for all NALU types
+- `-t TYPES`, `--verbose-types TYPES`: Comma-separated list of NALU types for human-readable output to stderr
+
+### Examples
+
+```bash
+# JSON to stdout (default)
+h26x-extractor video.264
+
+# JSON to file
+h26x-extractor -o output.json video.264
+
+# JSON to stdout + human-readable tables to stderr
+h26x-extractor -v video.264
+
+# JSON only (discard human-readable output)
+h26x-extractor -v video.264 2>/dev/null
+
+# Human-readable only (discard JSON)
+h26x-extractor -v video.264 > /dev/null
+
+# Only show specific NALU types (7=SPS, 8=PPS) in human-readable output
+h26x-extractor -t 7,8 video.264
+```
+
+### Human-Readable Output
+
+When using `-v` or `-t`, human-readable output is written to stderr. For each NAL unit, you will get:
 
 - The byte position range
 - The offset from the start of the stream
@@ -142,6 +233,7 @@ The callback is called for each type of info found. Valid callbacks are:
 
 The callback returns an instance of the NALU type. You can access the `s` property to get the whole data including the RBSP.
 You can use the `set_allcallbacks` method to set callbacks for all types.
+You can also call `to_dict()` on any NALU instance to get a dictionary representation suitable for JSON serialization.
 
 You can also call the `nalutypes` classes to decode the individual fields, e.g. `nalutypes.SPS`:
 

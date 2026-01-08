@@ -158,6 +158,25 @@ class H264ParserTest(unittest.TestCase):
             _, _, _, _, _, type = pos
             self.assertEqual(type, expected_type)
 
+    def test_to_dict(self):
+        """Test to_dict() method for JSON serialization"""
+
+        def verify_sps_dict(sps, type, start, end):
+            if type != NAL_UNIT_TYPE_SPS:
+                return
+            d = sps.to_dict()
+            # Verify it's a dict with expected keys
+            self.assertIsInstance(d, dict)
+            self.assertEqual(d["profile_idc"], 100)
+            self.assertEqual(d["level_idc"], 13)
+            self.assertEqual(d["seq_parameter_set_id"], 0)
+            # Verify internal fields are excluded
+            self.assertNotIn("s", d)
+            self.assertNotIn("order", d)
+
+        self.parser.set_callback("sps", verify_sps_dict)
+        self.parser.parse()
+
 
 if __name__ == "__main__":
     unittest.main()

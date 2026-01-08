@@ -147,12 +147,38 @@ class NALU(object):
         self.s = rbsp_bytes
         self.order = order
 
-    def print_verbose(self):
+    def to_dict(self):
+        """
+        Convert the NALU to a dictionary for JSON serialization.
+        """
+        result = {}
+        if self.order is not None:
+            for key in self.order:
+                if key in vars(self):
+                    result[key] = vars(self)[key]
+        for key, value in sorted(vars(self).items()):
+            if key == "s" or key == "order":
+                continue
+            if self.order and key in self.order:
+                continue
+            result[key] = value
+        return result
+
+    def print_verbose(self, file=None):
+        """
+        Print the NALU information in a human-readable format.
+
+        :param file: File object to print to (default: stdout)
+        """
+        import sys
+
+        out = file if file is not None else sys.stdout
         print(
             self.__class__.__name__
             + " (payload size: "
             + str(len(self.s) / 8)
-            + " Bytes)"
+            + " Bytes)",
+            file=out,
         )
         to_print = []
         if self.order is not None:
@@ -166,7 +192,7 @@ class NALU(object):
             if self.order and key in self.order:
                 continue
             to_print.append([key, value])
-        print(tabulate(to_print, headers=["field", "value"], tablefmt="grid"))
+        print(tabulate(to_print, headers=["field", "value"], tablefmt="grid"), file=out)
 
 
 class AUD(NALU):
