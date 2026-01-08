@@ -6,7 +6,7 @@ Author: Werner Robitza, with contributions from @chemag, Paulo Sherring, Thomas 
 
 Extracts NAL units from H.264 bitstreams and decodes their type and content, if supported.
 
-⚠️ `h26x-extractor` is neither fast nor robust to bitstream errors. It's rather a playground for parsing bitstreams. Use with caution! This program is no longer maintained, PRs are welcome.
+⚠️ `h26x-extractor` is neither fast nor robust to bitstream errors. It's rather a playground for parsing bitstreams. Use with caution!
 
 Contents:
 
