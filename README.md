@@ -1,4 +1,8 @@
-# h26x-extractor
+<h1 align="center">h26x-extractor</h1>
+
+<p align="center">
+  <img src="icon.png" alt="h26x-extractor logo" width="160" height="160">
+</p>
 
 [![PyPI version](https://img.shields.io/pypi/v/h26x-extractor.svg)](https://pypi.org/project/h26x-extractor)
 
