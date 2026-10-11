@@ -40,7 +40,7 @@ h26x-extractor = "h26x_extractor.__main__:main"
 
 [dependency-groups]
 dev = [
-    "pytest >=8.1.1,<9",
+    "pytest>=9.0.3",
     "ruff>=0.12.11",
     "types-tabulate",
     "pdoc>=15.0.4",
