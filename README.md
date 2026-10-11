@@ -28,7 +28,7 @@ Contents:
 
 ## Installation
 
-Requirements: Python 3.9 or higher
+Requirements: Python 3.10 or higher
 
 Via [uv](https://docs.astral.sh/uv/getting-started/installation/):
 
