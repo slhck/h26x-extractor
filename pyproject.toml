@@ -28,7 +28,7 @@ classifiers = [
 dependencies = [
     "docopt",
     "tabulate",
-    "bitstring",
+    "bitstring>=4,<5",
 ]
 
 [project.urls]
