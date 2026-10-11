@@ -1,3 +1,18 @@
+## [0.11.2] - 2026-10-11
+
+### 🐛 Bug Fixes
+
+- *(deps)* Require bitstring below 5
+- *(deps)* Update dependencies with known vulnerabilities
+
+### 📚 Documentation
+
+- *(readme)* Add centered project icon
+
+### ⚙️ Miscellaneous Tasks
+
+- Require Python 3.10 and support Python 3.15
+- Bump version to 0.11.2
 ## [0.11.1] - 2026-03-30
 
 ### 📚 Documentation
